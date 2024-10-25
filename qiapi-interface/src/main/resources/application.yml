@@ -1,0 +1,14 @@
+# 公共配置文件
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+spring:
+  application:
+    name: qiapi-interface
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/qiapi
+    username: root
+    password: 123456
