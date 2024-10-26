@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.rickey.project.annotation.AuthCheck;
 import com.rickey.project.common.*;
+import com.rickey.project.config.SentinelConfig;
 import com.rickey.project.constant.CommonConstant;
 import com.rickey.project.exception.BusinessException;
 import com.rickey.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
@@ -45,7 +46,6 @@ public class InterfaceInfoController {
 
     @Resource
     private QiApiClient qiApiClient;
-
 
     // region 增删改查
 
@@ -266,31 +266,17 @@ public class InterfaceInfoController {
     }
 
     /**
-     * 随机毒鸡汤接口
-     *
-     * @param request
-     * @return
-     */
-    @SentinelResource("getRandomEncouragement")
-    @GetMapping("/random/encouragement")
-    public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
-        QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
-        String randomEncouragement = tempClient.getRandomEncouragement();
-        System.out.println(randomEncouragement);
-        return ResultUtils.success(randomEncouragement);
-    }
-
-    /**
      * POST方式获取用户名
      *
      * @param interfaceInfoInvokeRequest
      * @param request
      * @return
      */
+
     @PostMapping("/name/user")
+    @SentinelResource(value = "qi-api-interface",
+            blockHandler = "fallbackPOST", blockHandlerClass = SentinelConfig.class,
+            fallback = "blockHandlerPOST", fallbackClass = SentinelConfig.class)
     public BaseResponse<Object> getUserNameByPost(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                   HttpServletRequest request) {
         // 前端传过来的 id
@@ -317,6 +303,26 @@ public class InterfaceInfoController {
         com.rickey.qiapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.rickey.qiapiclientsdk.model.User.class);
         String usernameByPost = tempClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);
+    }
+
+    /**
+     * 随机毒鸡汤接口
+     *
+     * @param request
+     * @return
+     */
+    @SentinelResource(value = "qi-api-interface",
+            blockHandler = "fallbackGET", blockHandlerClass = SentinelConfig.class,
+            fallback = "blockHandlerGET", fallbackClass = SentinelConfig.class)
+    @GetMapping("/random/encouragement")
+    public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
+        String randomEncouragement = tempClient.getRandomEncouragement();
+        System.out.println(randomEncouragement);
+        return ResultUtils.success(randomEncouragement);
     }
 
 }
