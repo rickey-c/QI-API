@@ -1,5 +1,6 @@
 package com.rickey.project.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
@@ -270,6 +271,7 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
+    @SentinelResource("getRandomEncouragement")
     @GetMapping("/random/encouragement")
     public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);

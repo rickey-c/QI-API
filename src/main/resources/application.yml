@@ -21,6 +21,11 @@ spring:
     database: 0
   cache:
     type: redis
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8880
+        port: 7529
 server:
   port: 7529
   servlet:
@@ -50,3 +55,4 @@ mybatis:
   mapperLocations: classpath*:mapper/**/*Mapper.xml
   # 加载全局的配置文件
   configLocation: classpath:mybatis/mybatis-config.xml
+
