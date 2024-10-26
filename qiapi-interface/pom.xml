@@ -73,6 +73,18 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <!--        mybatisplus+数据库相关结束-->
+        <!--sentinel-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+            <version>2021.0.6.0</version>
+        </dependency>
+        <!--aspectj依赖，添加了降级熔断策略-->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-annotation-aspectj</artifactId>
+            <version>1.8.2</version>
+        </dependency>
     </dependencies>
 
     <build>

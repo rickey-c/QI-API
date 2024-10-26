@@ -13,7 +13,7 @@ spring:
   # session 失效时间（分钟）
   session:
     timeout: 86400
-    store-type: none
+    store-type: redis
   # redis 配置
   redis:
     port: 6379
@@ -25,7 +25,8 @@ spring:
     sentinel:
       transport:
         dashboard: localhost:8880
-        port: 7529
+        port: 8723
+        clientIp: localhost
 server:
   port: 7529
   servlet:

@@ -1,6 +1,8 @@
 package com.rickey.qiapiinterface.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.rickey.qiapiinterface.config.SentinelConfig;
 import com.rickey.qiapiinterface.service.EncouragementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,9 @@ public class RandomController {
     private EncouragementService encouragementService;
 
     @GetMapping("/encouragement")
+    @SentinelResource(value = "qi-api-interface",
+            blockHandler = "blockHandlerGET", blockHandlerClass = SentinelConfig.class,
+            fallback = "fallbackGET", fallbackClass = SentinelConfig.class)
     public String getRandomEncouragement(HttpServletRequest request) {
         log.info(request.getRequestURI());
         String result = "心灵鸡汤为: " + encouragementService.getRandomEncouragement().getMessage();

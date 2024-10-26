@@ -22,6 +22,7 @@ import com.rickey.qiapicommon.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -36,7 +37,11 @@ import java.util.List;
 @Slf4j
 public class InterfaceInfoController {
 
-    String BASE_URL = "http://localhost:8123/api";
+    static final String BASE_URL = "http://localhost:8123/api";
+
+    private static final String CACHE_KEY_PREFIX_INTERFACE = "interfaceInfo:";
+
+    private static final String CACHE_KEY_PREFIX_INTERFACE_PAGE = "interfaceInfoPage:";
 
     @Resource
     private InterfaceInfoService interfaceInfoService;
@@ -46,6 +51,9 @@ public class InterfaceInfoController {
 
     @Resource
     private QiApiClient qiApiClient;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     // region 增删改查
 
@@ -142,10 +150,20 @@ public class InterfaceInfoController {
      */
     @GetMapping("/get")
     public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id) {
+        // 先进行合法性判断
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        // 查缓存
+        String cacheKey = CACHE_KEY_PREFIX_INTERFACE + id;
+        InterfaceInfo interfaceInfo = (InterfaceInfo) redisTemplate.opsForValue().get(cacheKey);
+        if (interfaceInfo != null) {
+            return ResultUtils.success(interfaceInfo); // 返回缓存中的数据
+        }
+        // 缓存查不到，查数据库
+        interfaceInfo = interfaceInfoService.getById(id);
+        // 加入缓存
+        redisTemplate.opsForValue().set(cacheKey, interfaceInfo);
         return ResultUtils.success(interfaceInfo);
     }
 
@@ -158,12 +176,18 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     @GetMapping("/list")
     public BaseResponse<List<InterfaceInfo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+        String cacheKey = "interfaceInfoList";
+        List<InterfaceInfo> interfaceInfoList = (List<InterfaceInfo>) redisTemplate.opsForValue().get(cacheKey);
+        if (interfaceInfoList != null) {
+            return ResultUtils.success(interfaceInfoList);
+        }
         InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
         if (interfaceInfoQueryRequest != null) {
             BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
-        List<InterfaceInfo> interfaceInfoList = interfaceInfoService.list(queryWrapper);
+        interfaceInfoList = interfaceInfoService.list(queryWrapper);
+        redisTemplate.opsForValue().set(cacheKey, interfaceInfoList);
         return ResultUtils.success(interfaceInfoList);
     }
 
@@ -175,30 +199,51 @@ public class InterfaceInfoController {
      * @return
      */
     @GetMapping("/list/page")
-    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest, HttpServletRequest request) {
+    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest,
+                                                                     HttpServletRequest request) {
         if (interfaceInfoQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
-        BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
+
         long current = interfaceInfoQueryRequest.getCurrent();
         long size = interfaceInfoQueryRequest.getPageSize();
         String sortField = interfaceInfoQueryRequest.getSortField();
         String sortOrder = interfaceInfoQueryRequest.getSortOrder();
-        String description = interfaceInfoQuery.getDescription();
+        String description = interfaceInfoQueryRequest.getDescription();
+
+        // 生成缓存键
+        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_PAGE + current + ":" + size + ":" + description + ":" + sortField + ":" + sortOrder;
+
+        // 尝试从缓存中获取数据
+        Page<InterfaceInfo> interfaceInfoPage = (Page<InterfaceInfo>) redisTemplate.opsForValue().get(cacheKey);
+        if (interfaceInfoPage != null) {
+            return ResultUtils.success(interfaceInfoPage); // 返回缓存中的数据
+        }
+
         // description 需支持模糊搜索
-        interfaceInfoQuery.setDescription(null);
+        InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
+        BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoQuery);
+        interfaceInfoQuery.setDescription(null); // 清空原描述以避免 SQL 查询中的不必要限制
+
         // 限制爬虫
         if (size > 50) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
         queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
-                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
-        Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+                CommonConstant.SORT_ORDER_ASC.equals(sortOrder), sortField);
+
+        // 从数据库获取数据
+        interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+
+        // 将数据放入缓存
+        redisTemplate.opsForValue().set(cacheKey, interfaceInfoPage);
+
         return ResultUtils.success(interfaceInfoPage);
     }
+
 
     // endregion
 
@@ -272,11 +317,10 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
-
     @PostMapping("/name/user")
     @SentinelResource(value = "qi-api-interface",
-            blockHandler = "fallbackPOST", blockHandlerClass = SentinelConfig.class,
-            fallback = "blockHandlerPOST", fallbackClass = SentinelConfig.class)
+            blockHandler = "blockHandlerPOST", blockHandlerClass = SentinelConfig.class,
+            fallback = "fallbackPOST", fallbackClass = SentinelConfig.class)
     public BaseResponse<Object> getUserNameByPost(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                   HttpServletRequest request) {
         // 前端传过来的 id
@@ -312,8 +356,8 @@ public class InterfaceInfoController {
      * @return
      */
     @SentinelResource(value = "qi-api-interface",
-            blockHandler = "fallbackGET", blockHandlerClass = SentinelConfig.class,
-            fallback = "blockHandlerGET", fallbackClass = SentinelConfig.class)
+            blockHandler = "blockHandlerGET", blockHandlerClass = SentinelConfig.class,
+            fallback = "fallbackGET", fallbackClass = SentinelConfig.class)
     @GetMapping("/random/encouragement")
     public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
