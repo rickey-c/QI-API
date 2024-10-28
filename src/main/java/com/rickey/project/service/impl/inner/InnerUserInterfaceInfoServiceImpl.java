@@ -28,4 +28,10 @@ public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfo
         return userInterfaceInfoService.isLeftCount(interfaceInfoId, userId);
     }
 
+
+    @Override
+    public int getApiRemainingCalls(long interfaceInfoId, long userId) {
+        return userInterfaceInfoService.getApiRemainingCalls(interfaceInfoId, userId);
+    }
+
 }

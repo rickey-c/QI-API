@@ -15,4 +15,6 @@ public interface InnerUserInterfaceInfoService {
     boolean invokeCount(long interfaceInfoId, long userId);
 
     boolean hasRemainingInvokeCount(long interfaceInfoId, long userId);
+
+    int getApiRemainingCalls(long interfaceInfoId, long userId);
 }

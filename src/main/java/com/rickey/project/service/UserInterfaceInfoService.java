@@ -20,4 +20,6 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
     boolean invokeCount(long interfaceInfoId, long userId);
 
     boolean isLeftCount(long userId, long interfaceInfoId);
+
+    int getApiRemainingCalls(long interfaceInfoId, long userId);
 }

@@ -78,11 +78,6 @@ public class QiApiClient {
         return result;
     }
 
-    /**
-     * 随机获取一句鼓励话语,无需参数
-     *
-     * @return
-     */
     public String getRandomEncouragement() {
         HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/random/encouragement")
                 .addHeaders(getHeaderMap())

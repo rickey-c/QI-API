@@ -59,6 +59,20 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return userInterfaceInfo.getLeftNum() > 0;
     }
 
+    /**
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
+    @Override
+    public int getApiRemainingCalls(long interfaceInfoId, long userId) {
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId);
+        queryWrapper.eq("interfaceInfoId", interfaceInfoId);
+        UserInterfaceInfo userInterfaceInfo = this.getOne(queryWrapper);
+        return userInterfaceInfo.getLeftNum();
+    }
+
 
 }
 
