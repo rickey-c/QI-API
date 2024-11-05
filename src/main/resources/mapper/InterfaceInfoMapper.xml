@@ -28,4 +28,9 @@
         status,method,userId,invokedCount
         createTime,updateTime,isDelete
     </sql>
+    <select id="listTopInvokeInterfaceInfo" resultType="com.rickey.qiapicommon.model.entity.InterfaceInfo">
+        select id, invokedCount, name
+        from interface_info
+        order by invokedCount desc limit #{limit}
+    </select>
 </mapper>

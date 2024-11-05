@@ -1,18 +1,15 @@
 package com.rickey.project.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rickey.project.annotation.AuthCheck;
 import com.rickey.project.common.BaseResponse;
 import com.rickey.project.common.ErrorCode;
 import com.rickey.project.common.ResultUtils;
 import com.rickey.project.exception.BusinessException;
+import com.rickey.project.mapper.InterfaceInfoMapper;
 import com.rickey.project.mapper.UserInterfaceInfoMapper;
-import com.rickey.project.model.vo.InterfaceInfoVO;
 import com.rickey.project.service.InterfaceInfoService;
 import com.rickey.qiapicommon.model.entity.InterfaceInfo;
-import com.rickey.qiapicommon.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 分析控制器
@@ -37,25 +32,26 @@ public class AnalysisController {
     @Resource
     private InterfaceInfoService interfaceInfoService;
 
+    @Resource
+    private InterfaceInfoMapper interfaceInfoMapper;
+
+    /**
+     * 获取调用次数最多的接口信息
+     *
+     * @return 调用次数最多的接口信息列表
+     */
     @GetMapping("/top/interface/invoke")
     @AuthCheck(mustRole = "admin")
-    public BaseResponse<List<InterfaceInfoVO>> listTopInvokeInterfaceInfo() {
-        List<UserInterfaceInfo> userInterfaceInfoList = userInterfaceInfoMapper.listTopInvokeInterfaceInfo(3);
-        Map<Long, List<UserInterfaceInfo>> interfaceInfoIdObjMap = userInterfaceInfoList.stream()
-                .collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));
-        QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id", interfaceInfoIdObjMap.keySet());
-        List<InterfaceInfo> list = interfaceInfoService.list(queryWrapper);
-        if (CollectionUtils.isEmpty(list)) {
+    public BaseResponse<List<InterfaceInfo>> listTopInvokeInterfaceInfo() {
+        // 根据interface表直接查询调用次数最多的前3个接口信息
+        List<InterfaceInfo> interfaceInfoList = interfaceInfoMapper.listTopInvokeInterfaceInfo(3);
+
+        // 如果查询结果为空，抛出系统错误异常
+        if (CollectionUtils.isEmpty(interfaceInfoList)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        List<InterfaceInfoVO> interfaceInfoVOList = list.stream().map(interfaceInfo -> {
-            InterfaceInfoVO interfaceInfoVO = new InterfaceInfoVO();
-            BeanUtils.copyProperties(interfaceInfo, interfaceInfoVO);
-            int totalNum = interfaceInfoIdObjMap.get(interfaceInfo.getId()).get(0).getTotalNum();
-            interfaceInfoVO.setTotalNum(totalNum);
-            return interfaceInfoVO;
-        }).collect(Collectors.toList());
-        return ResultUtils.success(interfaceInfoVOList);
+
+        // 返回结果
+        return ResultUtils.success(interfaceInfoList);
     }
 }
