@@ -64,6 +64,11 @@ public class User implements Serializable {
     private Date createTime;
 
     /**
+     * 剩余调用次数
+     */
+    private Long remainingCalls;
+
+    /**
      * 更新时间
      */
     private Date updateTime;
