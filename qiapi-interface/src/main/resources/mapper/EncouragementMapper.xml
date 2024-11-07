@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rickey.qiapiinterface.mapper.EncouragementMapper">
 
-    <resultMap id="BaseResultMap" type="com.rickey.qiapiinterface.model.entity.Encouragement">
+    <resultMap id="BaseResultMap" type="com.rickey.myInterface.model.entity.Encouragement">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="message" column="message" jdbcType="VARCHAR"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
@@ -17,7 +17,7 @@
         ,message,createTime,
         updateTime,isDelete
     </sql>
-    <select id="getRandomEncouragement" resultType="com.rickey.qiapiinterface.model.entity.Encouragement">
+    <select id="getRandomEncouragement" resultType="com.rickey.myInterface.model.entity.Encouragement">
         SELECT *
         FROM encouragement
         WHERE isDelete = 0

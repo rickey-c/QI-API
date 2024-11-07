@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rickey.project.exception.BusinessException;
 import com.rickey.project.mapper.InterfaceInfoMapper;
 import com.rickey.project.common.ErrorCode;
-import com.rickey.qiapicommon.model.entity.InterfaceInfo;
-import com.rickey.qiapicommon.service.InnerInterfaceInfoService;
+import com.rickey.common.model.entity.InterfaceInfo;
+import com.rickey.common.service.InnerInterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 

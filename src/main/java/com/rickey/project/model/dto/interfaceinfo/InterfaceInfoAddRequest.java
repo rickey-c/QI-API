@@ -3,6 +3,7 @@ package com.rickey.project.model.dto.interfaceinfo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * 接口创建请求
@@ -44,5 +45,10 @@ public class InterfaceInfoAddRequest implements Serializable {
      * 请求类型
      */
     private String method;
+
+    /**
+     * 每次调用的费用
+     */
+    private BigDecimal costPerCall;
 
 }

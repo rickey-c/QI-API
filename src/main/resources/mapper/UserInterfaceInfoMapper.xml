@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rickey.project.mapper.UserInterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.rickey.qiapicommon.model.entity.UserInterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.rickey.common.model.entity.UserInterfaceInfo">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="BIGINT"/>
@@ -22,7 +22,7 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
-    <select id="listTopInvokeInterfaceInfo" resultType="com.rickey.qiapicommon.model.entity.UserInterfaceInfo">
+    <select id="listTopInvokeInterfaceInfo" resultType="com.rickey.common.model.entity.UserInterfaceInfo">
         select interfaceInfoId, sum(totalNum) as totalNum
         from user_interface_info
         group by interfaceInfoId

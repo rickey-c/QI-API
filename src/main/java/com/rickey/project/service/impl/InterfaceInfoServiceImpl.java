@@ -5,7 +5,7 @@ import com.rickey.project.exception.BusinessException;
 import com.rickey.project.mapper.InterfaceInfoMapper;
 import com.rickey.project.service.InterfaceInfoService;
 import com.rickey.project.common.ErrorCode;
-import com.rickey.qiapicommon.model.entity.InterfaceInfo;
+import com.rickey.common.model.entity.InterfaceInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

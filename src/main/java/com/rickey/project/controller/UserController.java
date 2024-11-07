@@ -1,8 +1,10 @@
 package com.rickey.project.controller;
 
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.rickey.common.model.entity.User;
 import com.rickey.project.common.BaseResponse;
 import com.rickey.project.common.DeleteRequest;
 import com.rickey.project.common.ErrorCode;
@@ -11,9 +13,9 @@ import com.rickey.project.exception.BusinessException;
 import com.rickey.project.model.dto.user.*;
 import com.rickey.project.model.vo.UserVO;
 import com.rickey.project.service.UserService;
-import com.rickey.qiapicommon.model.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,6 +32,11 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    /**
+     * 盐值，混淆密码
+     */
+    private static final String SALT = "rickey";
 
     // region 登录相关
 
@@ -159,6 +166,8 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + user.getUserPassword()).getBytes());
+        user.setUserPassword(encryptPassword);
         boolean result = userService.updateById(user);
         return ResultUtils.success(result);
     }

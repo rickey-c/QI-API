@@ -9,7 +9,7 @@ import com.rickey.project.exception.BusinessException;
 import com.rickey.project.common.ErrorCode;
 import com.rickey.project.mapper.UserMapper;
 import com.rickey.project.service.UserService;
-import com.rickey.qiapicommon.model.entity.User;
+import com.rickey.common.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

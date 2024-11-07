@@ -1,7 +1,7 @@
 package com.rickey.project.service.impl.inner;
 
 import com.rickey.project.service.UserInterfaceInfoService;
-import com.rickey.qiapicommon.service.InnerUserInterfaceInfoService;
+import com.rickey.common.service.InnerUserInterfaceInfoService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

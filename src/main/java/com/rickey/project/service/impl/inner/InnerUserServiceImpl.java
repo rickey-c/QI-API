@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rickey.project.exception.BusinessException;
 import com.rickey.project.mapper.UserMapper;
 import com.rickey.project.common.ErrorCode;
-import com.rickey.qiapicommon.model.entity.User;
-import com.rickey.qiapicommon.service.InnerUserService;
+import com.rickey.common.model.entity.User;
+import com.rickey.common.service.InnerUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 

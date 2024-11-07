@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rickey.project.mapper.InterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.rickey.qiapicommon.model.entity.InterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.rickey.common.model.entity.InterfaceInfo">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
@@ -18,6 +18,7 @@
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
         <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+        <result property="costPerCall" column="cost_per_call" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -25,6 +26,7 @@
         ,name,description,
         url,requestParams,requestHeader,responseHeader,
         status,method,userId,
-        createTime,updateTime,isDelete
+        createTime,updateTime,isDelete,
+        cost_per_call
     </sql>
 </mapper>

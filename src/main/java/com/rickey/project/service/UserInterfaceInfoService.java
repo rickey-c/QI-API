@@ -1,7 +1,7 @@
 package com.rickey.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.rickey.qiapicommon.model.entity.UserInterfaceInfo;
+import com.rickey.common.model.entity.UserInterfaceInfo;
 
 /**
  * 用户接口信息服务

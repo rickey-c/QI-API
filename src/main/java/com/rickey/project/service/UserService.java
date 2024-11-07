@@ -2,7 +2,7 @@ package com.rickey.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.rickey.qiapicommon.model.entity.User;
+import com.rickey.common.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 

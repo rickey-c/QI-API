@@ -1,7 +1,7 @@
 package com.rickey.project.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.rickey.qiapicommon.model.entity.User;
+import com.rickey.common.model.entity.User;
 
 /**
  * 用户 Mapper

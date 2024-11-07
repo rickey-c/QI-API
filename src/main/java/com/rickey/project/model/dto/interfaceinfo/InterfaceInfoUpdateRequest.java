@@ -3,6 +3,7 @@ package com.rickey.project.model.dto.interfaceinfo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * 更新请求
@@ -54,6 +55,11 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      * 请求类型
      */
     private String method;
+
+    /**
+     * 每次调用的费用
+     */
+    private BigDecimal costPerCall;
 
     private static final long serialVersionUID = 1L;
 }

@@ -1,6 +1,6 @@
 package com.rickey.project.model.vo;
 
-import com.rickey.qiapicommon.model.entity.InterfaceInfo;
+import com.rickey.common.model.entity.InterfaceInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

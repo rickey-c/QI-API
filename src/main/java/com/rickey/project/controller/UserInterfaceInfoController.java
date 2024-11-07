@@ -15,8 +15,8 @@ import com.rickey.project.model.dto.userinterfaceinfo.UserInterfaceInfoQueryRequ
 import com.rickey.project.model.dto.userinterfaceinfo.UserInterfaceInfoUpdateRequest;
 import com.rickey.project.service.UserInterfaceInfoService;
 import com.rickey.project.service.UserService;
-import com.rickey.qiapicommon.model.entity.User;
-import com.rickey.qiapicommon.model.entity.UserInterfaceInfo;
+import com.rickey.common.model.entity.User;
+import com.rickey.common.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

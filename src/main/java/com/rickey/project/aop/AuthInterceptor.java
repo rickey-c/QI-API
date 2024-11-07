@@ -5,7 +5,7 @@ import com.rickey.project.annotation.AuthCheck;
 import com.rickey.project.common.ErrorCode;
 import com.rickey.project.exception.BusinessException;
 import com.rickey.project.service.UserService;
-import com.rickey.qiapicommon.model.entity.User;
+import com.rickey.common.model.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

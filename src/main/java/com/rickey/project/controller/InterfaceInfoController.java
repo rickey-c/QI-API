@@ -4,6 +4,9 @@ import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
+import com.rickey.clientSDK.client.QiApiClient;
+import com.rickey.common.model.entity.InterfaceInfo;
+import com.rickey.common.model.entity.User;
 import com.rickey.project.annotation.AuthCheck;
 import com.rickey.project.common.*;
 import com.rickey.project.config.SentinelConfig;
@@ -16,9 +19,6 @@ import com.rickey.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.rickey.project.model.enums.InterfaceInfoStatusEnum;
 import com.rickey.project.service.InterfaceInfoService;
 import com.rickey.project.service.UserService;
-import com.rickey.qiapiclientsdk.client.QiApiClient;
-import com.rickey.qiapicommon.model.entity.InterfaceInfo;
-import com.rickey.qiapicommon.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -268,7 +268,7 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 判断该接口是否可以调用
-        com.rickey.qiapiclientsdk.model.User user = new com.rickey.qiapiclientsdk.model.User();
+        com.rickey.clientSDK.model.User user = new com.rickey.clientSDK.model.User();
         user.setUsername("test");
         String username = qiApiClient.getUsernameByPost(user);
         if (StringUtils.isBlank(username)) {
@@ -344,7 +344,7 @@ public class InterfaceInfoController {
 
         QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
         Gson gson = new Gson();
-        com.rickey.qiapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.rickey.qiapiclientsdk.model.User.class);
+        com.rickey.clientSDK.model.User user = gson.fromJson(userRequestParams, com.rickey.clientSDK.model.User.class);
         String usernameByPost = tempClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);
     }
