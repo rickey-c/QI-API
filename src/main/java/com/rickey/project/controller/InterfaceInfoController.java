@@ -365,7 +365,6 @@ public class InterfaceInfoController {
         String secretKey = loginUser.getSecretKey();
         QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
         String randomEncouragement = tempClient.getRandomEncouragement();
-        System.out.println(randomEncouragement);
         return ResultUtils.success(randomEncouragement);
     }
 
