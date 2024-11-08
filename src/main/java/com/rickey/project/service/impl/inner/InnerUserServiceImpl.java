@@ -29,22 +29,4 @@ public class InnerUserServiceImpl implements InnerUserService {
         queryWrapper.eq("accessKey", accessKey);
         return userMapper.selectOne(queryWrapper);
     }
-
-    /**
-     * @param userId
-     * @return
-     */
-    @Override
-    public Boolean updateInvokeCount(long userId) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id", userId);
-        User user = userMapper.selectOne(queryWrapper);
-        if (user != null) {
-            user.setRemainingCalls(user.getRemainingCalls() - 1);
-            userMapper.updateById(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

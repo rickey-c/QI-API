@@ -16,5 +16,4 @@ public interface InnerUserService {
      */
     User getInvokeUser(String accessKey);
 
-    Boolean updateInvokeCount(long userId);
 }

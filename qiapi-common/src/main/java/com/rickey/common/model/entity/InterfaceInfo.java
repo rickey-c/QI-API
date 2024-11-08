@@ -69,11 +69,6 @@ public class InterfaceInfo implements Serializable {
 
 
     /**
-     * 被调用次数
-     */
-    private Long invokedCount;
-
-    /**
      * 每次调用的费用
      */
     private BigDecimal costPerCall;

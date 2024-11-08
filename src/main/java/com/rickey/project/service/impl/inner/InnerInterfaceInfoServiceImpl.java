@@ -6,6 +6,7 @@ import com.rickey.project.mapper.InterfaceInfoMapper;
 import com.rickey.project.common.ErrorCode;
 import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.service.InnerInterfaceInfoService;
+import com.rickey.project.service.InterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 
@@ -20,6 +21,9 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
     @Resource
     private InterfaceInfoMapper interfaceInfoMapper;
 
+    @Resource
+    private InterfaceInfoService interfaceInfoService;
+
     @Override
     public InterfaceInfo getInterfaceInfo(String url, String method) {
         if (StringUtils.isAnyBlank(url, method)) {
@@ -30,5 +34,6 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
         queryWrapper.eq("method", method);
         return interfaceInfoMapper.selectOne(queryWrapper);
     }
+
 
 }

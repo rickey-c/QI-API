@@ -12,5 +12,4 @@ public interface InnerInterfaceInfoService {
      */
     InterfaceInfo getInterfaceInfo(String path, String method);
 
-    Boolean updateInvokeCount(long interfaceInfoId);
 }

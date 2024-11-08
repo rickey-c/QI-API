@@ -123,8 +123,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
             return handleNoAuth(response);
         }
 
-        // 5. 检查用户是否还有剩余的调用次数
-        long remainingCalls = invokeUser.getRemainingCalls();
+        // 根据UserInterfaceInfo表检查用户是否还有剩余的调用次数
+        long remainingCalls = innerUserInterfaceInfoService.getApiRemainingCalls(interfaceInfo.getId(), invokeUser.getId());
         if (remainingCalls <= 0) {
             return handleInvokeLimitError(response);
         }
@@ -176,8 +176,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                                         // 尝试更新数据库
                                         if (RemainingCalls != null && Integer.parseInt(RemainingCalls) > 0) {
                                             // 更新调用次数
-                                            innerUserService.updateInvokeCount(userId);
-                                            innerInterfaceInfoService.updateInvokeCount(interfaceInfoId);
+                                            innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
                                             // 删除redis键值对
                                             redisTemplate.delete(redisKey);
                                             log.info("调用次数更新成功");
