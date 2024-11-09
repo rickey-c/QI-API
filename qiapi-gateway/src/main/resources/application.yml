@@ -10,9 +10,22 @@ spring:
     gateway:
       default-filters:
         - AddResponseHeader=source, rickey
+      # 断言设计，目前有backend,interface,order,thirdParty
       routes:
-        - id: api_route
-          uri: http://localhost:8123
+        - id: order
+          uri: http://localhost:7531
+          predicates:
+            - Path=/api/order
+        - id: thirdParty
+          uri: http://localhost:7530
+          predicates:
+            - Path=/api/thirdParty
+#        - id: interface
+#          uri: http://localhost:8123
+#          predicates:
+#            - Path=/api/interface
+        - id: backend
+          uri: http://localhost:7529
           predicates:
             - Path=/api/**
   redis:
