@@ -67,7 +67,6 @@ public class InterfaceInfo implements Serializable {
      */
     private Long userId;
 
-
     /**
      * 每次调用的费用
      */

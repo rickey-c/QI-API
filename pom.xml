@@ -10,9 +10,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.rickey</groupId>
-    <artifactId>qiapi-backend</artifactId>
+    <artifactId>Qi-API</artifactId>
     <version>0.0.1</version>
-    <name>qiapi-backend</name>
+    <name>Qi-API</name>
     <description>Qi-API</description>
     <properties>
         <java.version>8</java.version>
@@ -142,6 +142,12 @@
             <artifactId>sentinel-annotation-aspectj</artifactId>
             <version>1.8.2</version>
         </dependency>
+        <!--阿里支付SDK-->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.22.110.ALL</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -176,5 +182,5 @@
             </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 </project>
