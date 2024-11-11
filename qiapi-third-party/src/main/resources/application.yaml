@@ -8,7 +8,7 @@ alipay:
 
 spring:
   application:
-    name: qiapi-thrid-pay
+    name: qiapi-third-party
 
 server:
   port: 7530

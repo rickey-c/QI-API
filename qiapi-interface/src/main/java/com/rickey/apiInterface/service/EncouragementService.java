@@ -1,8 +1,8 @@
-package com.rickey.myInterface.service;
+package com.rickey.apiInterface.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.rickey.myInterface.model.entity.Encouragement;
+import com.rickey.apiInterface.model.entity.Encouragement;
 
 /**
  * @author RicKey

@@ -1,5 +1,6 @@
 package com.rickey.gateway.qiapigateway;
 
+import cn.hutool.core.text.AntPathMatcher;
 import com.rickey.clientSDK.utils.SignUtils;
 import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.model.entity.User;
@@ -22,6 +23,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +37,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class CustomGlobalFilter implements GlobalFilter, Ordered {
+@CrossOrigin(origins = "*")
+public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
     @Resource
     private RedisTemplate redisTemplate;
@@ -57,8 +60,18 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 1. 请求日志记录
+
         ServerHttpRequest request = exchange.getRequest();
+        String webPath = request.getPath().value();
+
+        // 只在路径为 /api/interface/** 时进行过滤
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        if (!pathMatcher.match("/api/interface/**", webPath)) {
+            log.info("Skip成功");
+            return chain.filter(exchange);
+        }
+
+        // 1. 请求日志记录
         String path = INTERFACE_HOST + request.getPath().value(); // 请求路径
         String method = request.getMethod().toString(); // 请求方法
         log.info("请求唯一标识：" + request.getId());

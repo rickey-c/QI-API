@@ -1,4 +1,4 @@
-package com.rickey.myInterface.model.entity;
+package com.rickey.apiInterface.model.entity;
 
 
 import com.baomidou.mybatisplus.annotation.*;

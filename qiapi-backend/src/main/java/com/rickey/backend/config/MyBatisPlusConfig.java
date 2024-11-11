@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * MyBatis Plus 配置
  */
 @Configuration
-@MapperScan("com.rickey.gateway.mapper")
+@MapperScan("com.rickey.backend.mapper")
 public class MyBatisPlusConfig {
 
     /**

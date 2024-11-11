@@ -1,2 +1,6 @@
-server.port=7531
+server:
+  port: 7531
+spring:
+  application:
+    name: qiapi-order
 

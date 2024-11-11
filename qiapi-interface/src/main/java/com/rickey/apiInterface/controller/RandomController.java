@@ -1,9 +1,9 @@
-package com.rickey.myInterface.controller;
+package com.rickey.apiInterface.controller;
 
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.rickey.myInterface.config.SentinelConfig;
-import com.rickey.myInterface.service.EncouragementService;
+import com.rickey.apiInterface.config.SentinelConfig;
+import com.rickey.apiInterface.service.EncouragementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

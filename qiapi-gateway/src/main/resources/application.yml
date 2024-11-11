@@ -8,26 +8,39 @@ spring:
     web-application-type: reactive
   cloud:
     gateway:
+      # 网关全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+        # 解决options请求被拦截的问题
+        add-to-simple-url-handler-mapping: true
       default-filters:
         - AddResponseHeader=source, rickey
+      # 'requestFrom': 'Frontend', // 添加请求头，表示请求是从前端发出的
       # 断言设计，目前有backend,interface,order,thirdParty
       routes:
         - id: order
-          uri: http://localhost:7531
+          uri: lb://qiapi-order
           predicates:
             - Path=/api/order
         - id: thirdParty
-          uri: http://localhost:7530
+          uri: lb://qiapi-third-party
           predicates:
             - Path=/api/thirdParty
-#        - id: interface
-#          uri: http://localhost:8123
-#          predicates:
-#            - Path=/api/interface
         - id: backend
           uri: http://localhost:7529
           predicates:
             - Path=/api/**
+            # - Header=requestFrom, Frontend  # 匹配请求头 'requestFrom' 值为 'Frontend'
+        - id:
+          uri: lb://qiapi-backend
+          predicates:
+            - Path=/api/interface
+            - Header=requestFrom, Backend   # 匹配请求头 'requestFrom' 值为 'Backend'
   redis:
     host: localhost
     port: 6379

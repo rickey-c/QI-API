@@ -162,8 +162,9 @@ public class InterfaceInfoController {
         }
         // 缓存查不到，查数据库
         interfaceInfo = interfaceInfoService.getById(id);
+        log.info(interfaceInfo.toString());
         // 加入缓存
-        redisTemplate.opsForValue().set(cacheKey, interfaceInfo);
+        //redisTemplate.opsForValue().set(cacheKey, interfaceInfo);
         return ResultUtils.success(interfaceInfo);
     }
 

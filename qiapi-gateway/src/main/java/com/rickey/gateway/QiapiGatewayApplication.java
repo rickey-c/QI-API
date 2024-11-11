@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 @EnableCaching
 public class QiapiGatewayApplication {
-
-
     public static void main(String[] args) {
         ConfigurableApplicationContext context =
                 SpringApplication.run(QiapiGatewayApplication.class, args);

@@ -1,4 +1,4 @@
-package com.rickey.myInterface.config;
+package com.rickey.apiInterface.config;
 
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;

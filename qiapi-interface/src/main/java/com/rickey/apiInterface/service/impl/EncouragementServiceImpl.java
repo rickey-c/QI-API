@@ -1,10 +1,10 @@
-package com.rickey.myInterface.service.impl;
+package com.rickey.apiInterface.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rickey.myInterface.mapper.EncouragementMapper;
-import com.rickey.myInterface.model.entity.Encouragement;
-import com.rickey.myInterface.service.EncouragementService;
+import com.rickey.apiInterface.mapper.EncouragementMapper;
+import com.rickey.apiInterface.model.entity.Encouragement;
+import com.rickey.apiInterface.service.EncouragementService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

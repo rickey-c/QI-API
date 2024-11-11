@@ -1,4 +1,4 @@
-package com.rickey.myInterface.controller;
+package com.rickey.apiInterface.controller;
 
 import com.rickey.clientSDK.model.User;
 import org.springframework.web.bind.annotation.*;
