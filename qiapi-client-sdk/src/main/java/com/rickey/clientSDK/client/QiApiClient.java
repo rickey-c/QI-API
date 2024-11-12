@@ -26,7 +26,7 @@ public class QiApiClient {
 
     public String getUsernameByPost(User user) {
         String json = JSONUtil.toJsonStr(user);
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/api/interfaceInvoke/name/user")
                 .addHeaders(getHeaderMap(accessKey, secretKey, json))
                 .body(json)
                 .execute();
@@ -37,7 +37,7 @@ public class QiApiClient {
     }
 
     public String getRandomEncouragement() {
-        HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/random/encouragement")
+        HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/interfaceInvoke/random/encouragement")
                 .addHeaders(getHeaderMap(accessKey, secretKey))
                 .execute();
         System.out.println(httpResponse.getStatus());

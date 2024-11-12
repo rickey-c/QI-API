@@ -31,16 +31,15 @@ spring:
           uri: lb://qiapi-third-party
           predicates:
             - Path=/api/thirdParty
+        - id: interfaceInvoke
+          uri: http://localhost:8123
+          predicates:
+            - Path=/api/interfaceInvoke/**
         - id: backend
           uri: http://localhost:7529
           predicates:
             - Path=/api/**
-            # - Header=requestFrom, Frontend  # 匹配请求头 'requestFrom' 值为 'Frontend'
-        - id:
-          uri: lb://qiapi-backend
-          predicates:
-            - Path=/api/interface
-            - Header=requestFrom, Backend   # 匹配请求头 'requestFrom' 值为 'Backend'
+
   redis:
     host: localhost
     port: 6379

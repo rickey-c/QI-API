@@ -2,7 +2,7 @@
 server:
   port: 8123
   servlet:
-    context-path: /api
+    context-path: /api/interfaceInvoke
 spring:
   application:
     name: qiapi-interface
