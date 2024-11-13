@@ -1,4 +1,4 @@
-package com.rickey.backend.model.dto.order;
+package com.rickey.order.model.dto.order;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class OrderAddRequest implements Serializable {
+public class OrderUpdateRequest implements Serializable {
     /**
      * 主键id
      */
@@ -36,6 +36,5 @@ public class OrderAddRequest implements Serializable {
      * 订单状态
      */
     private Integer status;
-
 
 }

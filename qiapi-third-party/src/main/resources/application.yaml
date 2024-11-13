@@ -10,5 +10,8 @@ spring:
   application:
     name: qiapi-third-party
 
+
 server:
-  port: 7530
+  port: 7531
+  servlet:
+    context-path: /api/thirdParty

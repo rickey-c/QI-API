@@ -1,7 +1,6 @@
 package com.rickey.common.service;
 
 import com.rickey.common.model.entity.User;
-
 import javax.servlet.http.HttpServletRequest;
 
 

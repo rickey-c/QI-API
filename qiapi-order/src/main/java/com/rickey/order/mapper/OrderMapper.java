@@ -1,4 +1,4 @@
-package com.rickey.backend.mapper;
+package com.rickey.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rickey.common.model.entity.Order;

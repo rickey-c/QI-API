@@ -1,10 +1,10 @@
 package com.rickey.backend.service.impl.inner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.rickey.backend.exception.BusinessException;
 import com.rickey.backend.mapper.UserMapper;
-import com.rickey.backend.common.ErrorCode;
 import com.rickey.backend.service.UserService;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
 import com.rickey.common.service.InnerUserService;
 import org.apache.commons.lang3.StringUtils;

@@ -1,10 +1,10 @@
 package com.rickey.backend.aop;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.rickey.backend.annotation.AuthCheck;
-import com.rickey.backend.common.ErrorCode;
-import com.rickey.backend.exception.BusinessException;
 import com.rickey.backend.service.UserService;
+import com.rickey.common.annotation.AuthCheck;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

@@ -1,6 +1,6 @@
-package com.rickey.backend.common;
+package com.rickey.common.common;
 
-import com.rickey.backend.constant.CommonConstant;
+import com.rickey.common.constant.CommonConstant;
 import lombok.Data;
 
 /**

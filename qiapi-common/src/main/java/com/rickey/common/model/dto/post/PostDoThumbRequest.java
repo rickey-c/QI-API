@@ -1,4 +1,4 @@
-package com.rickey.backend.model.dto.post;
+package com.rickey.common.model.dto.post;
 
 import lombok.Data;
 

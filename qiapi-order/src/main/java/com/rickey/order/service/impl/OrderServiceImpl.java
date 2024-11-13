@@ -1,11 +1,11 @@
-package com.rickey.backend.service.impl;
+package com.rickey.order.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rickey.backend.common.ErrorCode;
-import com.rickey.backend.exception.BusinessException;
-import com.rickey.backend.mapper.OrderMapper;
-import com.rickey.backend.service.OrderService;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.Order;
+import com.rickey.order.mapper.OrderMapper;
+import com.rickey.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

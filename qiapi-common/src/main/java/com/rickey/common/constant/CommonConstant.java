@@ -1,4 +1,4 @@
-package com.rickey.backend.constant;
+package com.rickey.common.constant;
 
 /**
  * 通用常量

@@ -1,6 +1,6 @@
 package com.rickey.backend.model.dto.user;
 
-import com.rickey.backend.common.PageRequest;
+import com.rickey.common.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

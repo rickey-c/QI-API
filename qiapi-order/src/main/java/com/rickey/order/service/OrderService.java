@@ -1,4 +1,4 @@
-package com.rickey.backend.service;
+package com.rickey.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rickey.common.model.entity.Order;

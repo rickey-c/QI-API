@@ -1,12 +1,12 @@
 package com.rickey.backend.service.impl.inner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.rickey.backend.exception.BusinessException;
 import com.rickey.backend.mapper.InterfaceInfoMapper;
-import com.rickey.backend.common.ErrorCode;
+import com.rickey.backend.service.InterfaceInfoService;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.service.InnerInterfaceInfoService;
-import com.rickey.backend.service.InterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 

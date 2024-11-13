@@ -1,14 +1,14 @@
 package com.rickey.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.rickey.backend.annotation.AuthCheck;
-import com.rickey.backend.common.BaseResponse;
-import com.rickey.backend.common.ErrorCode;
-import com.rickey.backend.common.ResultUtils;
-import com.rickey.backend.exception.BusinessException;
 import com.rickey.backend.mapper.UserInterfaceInfoMapper;
 import com.rickey.backend.model.vo.InterfaceInfoVO;
 import com.rickey.backend.service.InterfaceInfoService;
+import com.rickey.common.annotation.AuthCheck;
+import com.rickey.common.common.BaseResponse;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.common.ResultUtils;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;

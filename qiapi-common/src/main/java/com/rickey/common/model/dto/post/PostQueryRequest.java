@@ -1,19 +1,17 @@
-package com.rickey.backend.model.dto.post;
+package com.rickey.common.model.dto.post;
 
+import com.rickey.common.common.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 /**
- * 更新请求
+ * 查询请求
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class PostUpdateRequest implements Serializable {
-
-    /**
-     * id
-     */
-    private long id;
+public class PostQueryRequest extends PageRequest implements Serializable {
 
     /**
      * 年龄
@@ -51,14 +49,9 @@ public class PostUpdateRequest implements Serializable {
     private String loveExp;
 
     /**
-     * 内容（个人介绍）
+     * 内容（个人介绍），支持模糊查询
      */
     private String content;
-
-    /**
-     * 照片地址
-     */
-    private String photo;
 
     /**
      * 状态（0-待审核, 1-通过, 2-拒绝）
@@ -66,9 +59,9 @@ public class PostUpdateRequest implements Serializable {
     private Integer reviewStatus;
 
     /**
-     * 审核信息
+     * 创建用户 id
      */
-    private String reviewMessage;
+    private Long userId;
 
     private static final long serialVersionUID = 1L;
 }

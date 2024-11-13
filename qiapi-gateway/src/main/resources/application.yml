@@ -24,13 +24,13 @@ spring:
       # 断言设计，目前有backend,interface,order,thirdParty
       routes:
         - id: order
-          uri: lb://qiapi-order
+          uri: http://localhost:7530
           predicates:
-            - Path=/api/order
+            - Path=/api/order/**
         - id: thirdParty
-          uri: lb://qiapi-third-party
+          uri: http://localhost:7531
           predicates:
-            - Path=/api/thirdParty
+            - Path=/api/thirdParty/**
         - id: interfaceInvoke
           uri: http://localhost:8123
           predicates:

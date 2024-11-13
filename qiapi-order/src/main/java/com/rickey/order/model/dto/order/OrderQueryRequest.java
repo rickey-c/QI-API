@@ -1,12 +1,16 @@
-package com.rickey.backend.model.dto.order;
+package com.rickey.order.model.dto.order;
 
+
+import com.rickey.common.common.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class OrderUpdateRequest implements Serializable {
+public class OrderQueryRequest extends PageRequest implements Serializable {
     /**
      * 主键id
      */

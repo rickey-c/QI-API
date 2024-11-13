@@ -3,10 +3,10 @@ package com.rickey.backend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rickey.backend.exception.BusinessException;
-import com.rickey.backend.common.ErrorCode;
 import com.rickey.backend.mapper.UserInterfaceInfoMapper;
 import com.rickey.backend.service.UserInterfaceInfoService;
+import com.rickey.common.common.ErrorCode;
+import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.UserInterfaceInfo;
 import org.springframework.stereotype.Service;
 
