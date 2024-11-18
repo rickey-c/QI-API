@@ -41,4 +41,5 @@ public class OrderQueryRequest extends PageRequest implements Serializable {
      */
     private Integer status;
 
+
 }

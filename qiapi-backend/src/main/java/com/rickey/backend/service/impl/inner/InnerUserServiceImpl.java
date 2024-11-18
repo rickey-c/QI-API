@@ -40,6 +40,7 @@ public class InnerUserServiceImpl implements InnerUserService {
         return userService.getLoginUser(request);
     }
 
+
     @Override
     public boolean isAdmin(HttpServletRequest request) {
         return userService.isAdmin(request);

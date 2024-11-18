@@ -2,6 +2,7 @@ package com.rickey.order.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rickey.clientSDK.client.PayClient;
 import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
@@ -23,7 +24,6 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +41,7 @@ public class OrderController {
     private OrderService orderService;
 
     @DubboReference
-    private InnerUserService innerUserService;
+    private InnerUserService innerUserService; // 用户服务接口
 
     @Resource
     private RedisTemplate redisTemplate;
@@ -52,11 +52,6 @@ public class OrderController {
     private static final String CACHE_KEY_PREFIX_ORDER = "order:";
 
     private static final String CACHE_KEY_PREFIX_ORDER_PAGE = "orderPage:";
-
-    /**
-     * 增删查改
-     */
-
 
     /**
      * 创建
@@ -210,18 +205,32 @@ public class OrderController {
         }
 
         long current = orderQueryRequest.getCurrent();
+        System.out.println("current = " + current);
         long size = orderQueryRequest.getPageSize();
-        String sortField = orderQueryRequest.getSortField();
+        System.out.println("size = " + size);
+        String sortField = "id";
+        System.out.println("sortField = " + sortField);
         String sortOrder = orderQueryRequest.getSortOrder();
-        String description = orderQueryRequest.getId().toString();
-        User loginUser = innerUserService.getLoginUser(request);
-        Long userId = loginUser.getId();
+        System.out.println("sortOrder = " + sortOrder);
+
+
+//        User loginUser = innerUserService.getLoginUser(request);
+//        Long userId = loginUser.getId();
+        // TODO 后期使用JWT去获取userId
+        Long userId = 1l;
+        System.out.println("userId = " + userId);
+
+        // 检查 orderQueryRequest 的字段
+        if (orderQueryRequest.getCurrent() == null || orderQueryRequest.getPageSize() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "分页参数不能为空");
+        }
 
         // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE + current + ":" + size + ":" + description + ":" + sortField + ":" + sortOrder;
+        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE + current + ":" + size + ":" + sortField + ":" + sortOrder;
 
         // 尝试从缓存中获取数据
         Page<Order> orderPage = (Page<Order>) redisTemplate.opsForValue().get(cacheKey);
+        System.out.println("orderPage from redis = " + orderPage);
         if (orderPage != null) {
             return ResultUtils.success(orderPage); // 返回缓存中的数据
         }
@@ -233,11 +242,6 @@ public class OrderController {
         // 设置用户ID
         orderQuery.setUserId(userId);
 
-        // 限制爬虫
-        if (size > 50) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>(orderQuery);
         // queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
@@ -245,11 +249,44 @@ public class OrderController {
 
         // 从数据库获取数据
         orderPage = orderService.page(new Page<>(current, size), queryWrapper);
+        System.out.println("orderPage from MySQL = " + orderPage);
 
         // 将数据放入缓存
         redisTemplate.opsForValue().set(cacheKey, orderPage);
 
         return ResultUtils.success(orderPage);
+    }
+
+    /**
+     * 支付订单
+     *
+     * @param orderPayRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update")
+    public BaseResponse<Boolean> payOrder(@RequestBody OrderPayRequest orderPayRequest,
+                                          HttpServletRequest request) {
+        if (orderPayRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Order order = new Order();
+        BeanUtils.copyProperties(orderUpdateRequest, order);
+        // 参数校验
+        orderService.validOrder(order, false);
+        User user = innerUserService.getLoginUser(request);
+        long id = orderUpdateRequest.getId();
+        // 判断是否存在
+        Order oldOrder = orderService.getById(id);
+        if (oldOrder == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 仅本人或管理员可修改
+        if (!oldOrder.getUserId().equals(user.getId()) && !innerUserService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean result = orderService.updateById(order);
+        return ResultUtils.success(result);
     }
 
 }
