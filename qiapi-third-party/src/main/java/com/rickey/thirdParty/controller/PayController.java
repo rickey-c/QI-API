@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * @Auther: csp1999
+ * @Auther: rickey
  * @Date: 2020/11/13/21:47
  * @Description: 支付宝沙箱测试 controller
  */
@@ -28,7 +28,7 @@ public class PayController {
      * @return
      * @throws AlipayApiException
      */
-    @PostMapping(value = "/order/alipay")
+    @PostMapping(value = "/alipay")
     public String alipay(String outTradeNo, String subject,
                          String totalAmount, String description) throws AlipayApiException {
         AliPayInfo aliPayInfo = new AliPayInfo();

@@ -19,6 +19,7 @@ import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.model.entity.User;
+import com.rickey.common.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alipay Sandbox Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+<h1>支付宝沙箱测试</h1>
+<form id="alipayForm">
+    <label for="outTradeNo">订单号 (outTradeNo)</label>
+    <input type="text" id="outTradeNo" name="outTradeNo" placeholder="请输入订单号" required>
+
+    <label for="subject">标题 (subject)</label>
+    <input type="text" id="subject" name="subject" placeholder="请输入支付标题" required>
+
+    <label for="totalAmount">金额 (totalAmount)</label>
+    <input type="number" step="0.01" id="totalAmount" name="totalAmount" placeholder="请输入金额" required>
+
+    <label for="description">描述 (description)</label>
+    <input type="text" id="description" name="description" placeholder="请输入描述" required>
+
+    <button type="button" id="submitBtn">发起支付</button>
+</form>
+
+<div class="response" id="response">
+    <strong>接口响应结果:</strong>
+    <pre id="responseText"></pre>
+</div>
+
+<script>
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+        const outTradeNo = document.getElementById('outTradeNo').value;
+        const subject = document.getElementById('subject').value;
+        const totalAmount = document.getElementById('totalAmount').value;
+        const description = document.getElementById('description').value;
+
+        const requestData = {
+            outTradeNo,
+            subject,
+            totalAmount,
+            description
+        };
+
+        try {
+            const response = await fetch('/api/thirdParty/alipay', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(requestData)
+            });
+
+            const result = await response.text();
+            document.getElementById('responseText').innerText = result;
+        } catch (error) {
+            document.getElementById('responseText').innerText = `Error: ${error.message}`;
+        }
+    });
+</script>
+</body>
+</html>

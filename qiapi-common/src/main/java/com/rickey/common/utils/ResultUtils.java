@@ -1,4 +1,7 @@
-package com.rickey.common.common;
+package com.rickey.common.utils;
+
+import com.rickey.common.common.BaseResponse;
+import com.rickey.common.common.ErrorCode;
 
 /**
  * 返回工具类

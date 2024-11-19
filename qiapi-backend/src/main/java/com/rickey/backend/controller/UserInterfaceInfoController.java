@@ -12,7 +12,7 @@ import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.DeleteRequest;
 import com.rickey.common.common.ErrorCode;
-import com.rickey.common.common.ResultUtils;
+import com.rickey.common.utils.ResultUtils;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
