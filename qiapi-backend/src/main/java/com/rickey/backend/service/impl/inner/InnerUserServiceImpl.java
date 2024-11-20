@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 内部用户服务实现类
@@ -35,14 +34,14 @@ public class InnerUserServiceImpl implements InnerUserService {
         return userMapper.selectOne(queryWrapper);
     }
 
+    /**
+     * @param token
+     * @return
+     */
     @Override
-    public User getLoginUser(HttpServletRequest request) {
-        return userService.getLoginUser(request);
+    public User getUserByToken(String token) {
+        return userService.getUserByToken(token);
     }
 
 
-    @Override
-    public boolean isAdmin(HttpServletRequest request) {
-        return userService.isAdmin(request);
-    }
 }

@@ -5,9 +5,9 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
+import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.utils.ResultUtils;
-import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

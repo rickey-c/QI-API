@@ -2,8 +2,8 @@ package com.rickey.backend.exception;
 
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.ErrorCode;
-import com.rickey.common.utils.ResultUtils;
 import com.rickey.common.exception.BusinessException;
+import com.rickey.common.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

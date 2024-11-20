@@ -5,6 +5,7 @@ import com.rickey.common.common.ErrorCode;
 
 /**
  * 返回工具类
+ *
  */
 public class ResultUtils {
 

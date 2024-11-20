@@ -8,12 +8,13 @@ import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.DeleteRequest;
 import com.rickey.common.common.ErrorCode;
-import com.rickey.common.utils.ResultUtils;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
+import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.Order;
 import com.rickey.common.model.entity.User;
 import com.rickey.common.service.InnerUserService;
+import com.rickey.common.utils.ResultUtils;
 import com.rickey.order.model.dto.order.OrderAddRequest;
 import com.rickey.order.model.dto.order.OrderQueryRequest;
 import com.rickey.order.model.dto.order.OrderUpdateRequest;
@@ -26,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -203,7 +205,6 @@ public class OrderController {
         if (orderQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
         long current = orderQueryRequest.getCurrent();
         System.out.println("current = " + current);
         long size = orderQueryRequest.getPageSize();
@@ -212,11 +213,17 @@ public class OrderController {
         System.out.println("sortField = " + sortField);
         String sortOrder = orderQueryRequest.getSortOrder();
         System.out.println("sortOrder = " + sortOrder);
+        Cookie[] cookies = request.getCookies();
 
-
+        // innerUserService.getUserByToken()
 //        User loginUser = innerUserService.getLoginUser(request);
 //        Long userId = loginUser.getId();
         // TODO 后期使用JWT去获取userId
+        RequestDTO requestDTO = new RequestDTO(request.getCookies());
+        // User loginUser = innerUserService.getLoginUser(requestDTO);
+        /**
+         * 直接传递request不可行，可以尝试提取DTO进行构建和传递
+         */
         Long userId = 1l;
         System.out.println("userId = " + userId);
 
@@ -260,14 +267,14 @@ public class OrderController {
     /**
      * 支付订单
      *
-     * @param orderPayRequest
+     * @param orderUpdateRequest
      * @param request
      * @return
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> payOrder(@RequestBody OrderPayRequest orderPayRequest,
+    public BaseResponse<Boolean> payOrder(@RequestBody OrderUpdateRequest orderUpdateRequest,
                                           HttpServletRequest request) {
-        if (orderPayRequest == null) {
+        if (orderUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Order order = new Order();

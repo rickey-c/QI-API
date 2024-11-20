@@ -1,15 +1,20 @@
 package com.rickey.backend.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rickey.backend.constant.UserConstant;
 import com.rickey.backend.mapper.UserMapper;
 import com.rickey.backend.service.UserService;
+import com.rickey.backend.utils.RedisUtil;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
+import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.User;
+import com.rickey.common.utils.CookieUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -29,6 +34,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     /**
      * 盐值，混淆密码
@@ -79,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+    public User userLogin(String userAccount, String userPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -102,9 +110,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
-        // 3. 记录用户的登录态
-        // 填写信息到request的session
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
         return user;
     }
 
@@ -132,6 +137,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return currentUser;
     }
 
+    @Override
+    public User getLoginUser(RequestDTO requestDTO) {
+        // 先判断是否已登录
+        // 从request中查询用户登录信息
+        //读取sessionID
+        String loginToken = CookieUtil.readLoginToken(requestDTO);
+        if (StrUtil.isBlank(loginToken)) {
+            return null;
+        }
+        //从Redis中获取用户的json数据
+        String userJson = (String) redisUtil.get(loginToken);
+        //json转换成Use对象
+        User user = JSONUtil.toBean(userJson, User.class);
+        return user;
+    }
+
     /**
      * 是否为管理员
      *
@@ -153,12 +174,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
-        }
         // 移除登录态
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
+    }
+
+    /**
+     * @param token
+     * @return
+     */
+    @Override
+    public User getUserByToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 查询 Redis 中的用户数据
+        String userJson = (String) redisUtil.get("session:" + token);
+        if (StringUtils.isBlank(userJson)) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return JSONUtil.toBean(userJson, User.class);
     }
 
 }

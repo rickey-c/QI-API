@@ -1,6 +1,7 @@
 package com.rickey.common.utils;
 
 import cn.hutool.core.util.StrUtil;
+import com.rickey.common.model.dto.request.RequestDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.Cookie;
@@ -16,12 +17,12 @@ public class CookieUtil {
     /**
      * 写cookie
      *
-     * @param token    就是sessionid，也就是cookie的值，这个值只要唯一就行了，使用UUID也可以
+     * @param token    就是sessionId，也就是cookie的值，这个值只要唯一就行了，使用UUID也可以
      * @param response 使用响应对象将cookie写到浏览器上
      */
     public static void writeLoginToken(String token, HttpServletResponse response) {
         Cookie cookie = new Cookie(COOKIE_NAME, token);
-        cookie.setDomain(COOKIE_DOMAIN);
+        // cookie.setDomain(COOKIE_DOMAIN);
         cookie.setPath("/");
         //设置生存时间.0无效，-1永久有效，时间是秒，生存时间设置为1h
         cookie.setMaxAge(60 * 60);
@@ -56,6 +57,29 @@ public class CookieUtil {
     }
 
     /**
+     * 读取cookie
+     *
+     * @param requestDTO
+     * @return
+     */
+    public static String readLoginToken(RequestDTO requestDTO) {
+        //获取cookie
+        Cookie[] cookies = requestDTO.getCookies();
+        if (cookies != null) {
+            //遍历cookie，取出我们自己的cookie，根据name获取
+            for (Cookie cookie : cookies) {
+                log.info("读取cookie cookieName{},cookieValue{}", cookie.getName(), cookie.getValue());
+                //获取自己的
+                if (StrUtil.equals(cookie.getName(), COOKIE_NAME)) {
+                    //获取值
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 删除cookie
      *
      * @param request
@@ -65,16 +89,39 @@ public class CookieUtil {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
+                log.info("cookie = {} ", cookie);
                 if (StrUtil.equals(cookie.getName(), COOKIE_NAME)) {
                     //设置cookie的有效期为0
                     cookie.setMaxAge(0);
                     cookie.setPath("/");
-                    cookie.setDomain(COOKIE_DOMAIN);
+                    // cookie.setDomain(COOKIE_DOMAIN);
                     log.info("删除cookie cookieName: {},cookieValue: {}", cookie.getName(), cookie.getValue());
                     response.addCookie(cookie);
                     return;
                 }
             }
         }
+    }
+
+    /**
+     * 根据 Cookie 名称获取特定的 Cookie 值
+     *
+     * @param request    HttpServletRequest 请求对象
+     * @param cookieName Cookie 的名称
+     * @return Cookie 的值，如果没有找到则返回 null
+     */
+    public static String getCookieValue(HttpServletRequest request, String cookieName) {
+        if (request == null || cookieName == null) {
+            return null;
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

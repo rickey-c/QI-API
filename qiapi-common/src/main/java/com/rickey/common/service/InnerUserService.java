@@ -1,7 +1,6 @@
 package com.rickey.common.service;
 
 import com.rickey.common.model.entity.User;
-import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -17,7 +16,5 @@ public interface InnerUserService {
      */
     User getInvokeUser(String accessKey);
 
-    User getLoginUser(HttpServletRequest request);
-
-    boolean isAdmin(HttpServletRequest request);
+    User getUserByToken(String token);
 }

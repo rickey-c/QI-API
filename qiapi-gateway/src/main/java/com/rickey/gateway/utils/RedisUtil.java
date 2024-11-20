@@ -1,4 +1,4 @@
-package com.rickey.backend.utils;
+package com.rickey.gateway.utils;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
