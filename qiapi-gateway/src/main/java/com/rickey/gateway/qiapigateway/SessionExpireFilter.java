@@ -75,7 +75,18 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
                     // 重置 Redis 中的过期时间
                     redisUtil.expire("session:" + loginToken, 600);
                     redisUtil.expire("token:user:" + user.getId(), 600);
-                    return chain.filter(exchange);
+
+                    // 将用户信息放入请求头中
+                    ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                            .header("userId", String.valueOf(user.getId())) // 添加用户ID到Header
+                            .header("userName", user.getUserName())// 添加用户名到Header（可以添加更多用户信息）
+                            .header("accessKey", user.getAccessKey())
+                            .header("secretKey", user.getSecretKey())
+                            .header("userRole", user.getUserRole())
+                            .build();
+
+                    // 使用修改后的请求继续链式调用
+                    return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 } else {
                     log.warn("无效的 Token 或用户信息已过期，Token: {}", loginToken);
 
@@ -91,8 +102,9 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         }
 
         // 如果没有 Token，直接返回未登录
-        return chain.filter(exchange);
+        return unauthorizedResponse(exchange);
     }
+
 
     /**
      * 构造未登录的响应

@@ -12,7 +12,6 @@ import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.Order;
-import com.rickey.common.model.entity.User;
 import com.rickey.common.service.InnerUserService;
 import com.rickey.common.utils.ResultUtils;
 import com.rickey.order.model.dto.order.OrderAddRequest;
@@ -27,7 +26,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -67,12 +65,19 @@ public class OrderController {
         if (orderAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = innerUserService.getLoginUser(request);
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        System.out.println("userId = " + userId);
+        String userRole = request.getHeader("userRole");
+        System.out.println("userRole = " + userRole);
+        String accessKey = request.getHeader("accessKey");
+        System.out.println("accessKey = " + accessKey);
+        String secretKey = request.getHeader("secretKey");
+        System.out.println("secretKey = " + secretKey);
 
         Order order = new Order();
         BeanUtils.copyProperties(orderAddRequest, order);
         // 手动填入当前用户的Id
-        order.setUserId(loginUser.getId());
+        order.setUserId(Long.valueOf(userId));
 
         // 校验
         orderService.validOrder(order, true);
@@ -96,18 +101,18 @@ public class OrderController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = innerUserService.getLoginUser(request);
-        long id = deleteRequest.getId();
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        String userRole = request.getHeader("userRole");
         // 判断是否存在
-        Order oldOrder = orderService.getById(id);
+        Order oldOrder = orderService.getById(userId);
         if (oldOrder == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可删除
-        if (!oldOrder.getUserId().equals(user.getId()) && !innerUserService.isAdmin(request)) {
+        if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        boolean b = orderService.removeById(id);
+        boolean b = orderService.removeById(userId);
         return ResultUtils.success(b);
     }
 
@@ -128,7 +133,8 @@ public class OrderController {
         BeanUtils.copyProperties(orderUpdateRequest, order);
         // 参数校验
         orderService.validOrder(order, false);
-        User user = innerUserService.getLoginUser(request);
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        String userRole = request.getHeader("userRole");
         long id = orderUpdateRequest.getId();
         // 判断是否存在
         Order oldOrder = orderService.getById(id);
@@ -136,7 +142,7 @@ public class OrderController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可修改
-        if (!oldOrder.getUserId().equals(user.getId()) && !innerUserService.isAdmin(request)) {
+        if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = orderService.updateById(order);
@@ -213,7 +219,10 @@ public class OrderController {
         System.out.println("sortField = " + sortField);
         String sortOrder = orderQueryRequest.getSortOrder();
         System.out.println("sortOrder = " + sortOrder);
-        Cookie[] cookies = request.getCookies();
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        System.out.println("userId = " + userId);
+        String accessKey = request.getHeader("accessKey");
+        System.out.println("accessKey = " + accessKey);
 
         // innerUserService.getUserByToken()
 //        User loginUser = innerUserService.getLoginUser(request);
@@ -221,10 +230,6 @@ public class OrderController {
         // TODO 后期使用JWT去获取userId
         RequestDTO requestDTO = new RequestDTO(request.getCookies());
         // User loginUser = innerUserService.getLoginUser(requestDTO);
-        /**
-         * 直接传递request不可行，可以尝试提取DTO进行构建和传递
-         */
-        Long userId = 1l;
         System.out.println("userId = " + userId);
 
         // 检查 orderQueryRequest 的字段
@@ -271,7 +276,7 @@ public class OrderController {
      * @param request
      * @return
      */
-    @PostMapping("/update")
+    @PostMapping("/pay")
     public BaseResponse<Boolean> payOrder(@RequestBody OrderUpdateRequest orderUpdateRequest,
                                           HttpServletRequest request) {
         if (orderUpdateRequest == null) {
@@ -281,7 +286,8 @@ public class OrderController {
         BeanUtils.copyProperties(orderUpdateRequest, order);
         // 参数校验
         orderService.validOrder(order, false);
-        User user = innerUserService.getLoginUser(request);
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        String userRole = request.getHeader("userRole");
         long id = orderUpdateRequest.getId();
         // 判断是否存在
         Order oldOrder = orderService.getById(id);
@@ -289,7 +295,7 @@ public class OrderController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可修改
-        if (!oldOrder.getUserId().equals(user.getId()) && !innerUserService.isAdmin(request)) {
+        if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = orderService.updateById(order);

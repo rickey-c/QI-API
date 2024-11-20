@@ -5,7 +5,6 @@ import com.rickey.backend.service.UserService;
 import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
-import com.rickey.common.model.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -31,8 +30,6 @@ public class AuthInterceptor {
     @Resource
     private UserService userService;
 
-    // https://t.zsxq.com/0emozsIJh
-
     /**
      * 执行拦截
      *
@@ -47,17 +44,15 @@ public class AuthInterceptor {
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         // 当前登录用户
-        User user = userService.getLoginUser(request);
+        String userRole = request.getHeader("userRole");
         // 拥有任意权限即通过
         if (CollectionUtils.isNotEmpty(anyRole)) {
-            String userRole = user.getUserRole();
             if (!anyRole.contains(userRole)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
         }
         // 必须有所有权限才通过
         if (StringUtils.isNotBlank(mustRole)) {
-            String userRole = user.getUserRole();
             if (!mustRole.equals(userRole)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
