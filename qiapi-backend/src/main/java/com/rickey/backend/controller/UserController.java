@@ -77,7 +77,6 @@ public class UserController {
      * 用户登录
      *
      * @param userLoginRequest
-     * @param session
      * @param response
      * @return
      */
@@ -88,7 +87,9 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
+        System.out.println("userAccount = " + userAccount);
         String userPassword = userLoginRequest.getUserPassword();
+        System.out.println("userPassword = " + userPassword);
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -105,9 +106,8 @@ public class UserController {
             boolean del = redisUtil.del("session:" + oldToken);// 删除旧 Token 对应的用户数据
             System.out.println("del = " + del);
         }
-        redisUtil.set(redisKey, newToken, 600); // 保存600s
-
-        redisUtil.set("session:" + newToken, JSONUtil.toJsonStr(user), 600);
+        redisUtil.set(redisKey, newToken, 600); // userId + token
+        redisUtil.set("session:" + newToken, JSONUtil.toJsonStr(user), 600); // token + userInfo
 
         CookieUtil.writeLoginToken(newToken, response);
         log.info("newToken : {}", newToken);
@@ -130,31 +130,15 @@ public class UserController {
         }
         //删除session
         CookieUtil.deleteLoginToken(request, response);
-        String redisKey = "token:user:" + getUserByToken(loginToken).getId();
+        String userId = request.getHeader("userId");
+        String redisKey = "token:user:" + userId;
         //删除缓存
-        boolean del = redisUtil.del("session:" + loginToken);
-        System.out.println("del = " + del);
-        System.out.println("redisKey = " + redisKey);
-        boolean del1 = redisUtil.del(redisKey);
-        System.out.println("del1 = " + del1);
-
+        redisUtil.del("session:" + loginToken);
+        redisUtil.del(redisKey);
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = userService.userLogout(request);
-        return ResultUtils.success(result);
-    }
-
-    public User getUserByToken(String token) {
-        if (StringUtils.isBlank(token)) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        // 查询 Redis 中的用户数据
-        String userJson = (String) redisUtil.get("session:" + token);
-        if (StringUtils.isBlank(userJson)) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return JSONUtil.toBean(userJson, User.class);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -224,7 +208,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request, HttpServletResponse response) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -233,6 +217,15 @@ public class UserController {
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + user.getUserPassword()).getBytes());
         user.setUserPassword(encryptPassword);
         boolean result = userService.updateById(user);
+        //读取sessionID
+        String loginToken = CookieUtil.readLoginToken(request);
+        //删除session
+        CookieUtil.deleteLoginToken(request, response);
+        String userId = request.getHeader("userId");
+        String redisKey = "token:user:" + userId;
+        //删除缓存
+        redisUtil.del("session:" + loginToken);
+        redisUtil.del(redisKey);
         return ResultUtils.success(result);
     }
 

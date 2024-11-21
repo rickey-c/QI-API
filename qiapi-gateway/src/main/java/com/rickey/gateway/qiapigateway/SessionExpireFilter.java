@@ -27,6 +27,8 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Resource;
 import javax.servlet.annotation.WebFilter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 过滤器，重置redis中session有效期
@@ -55,10 +57,18 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String webPath = request.getPath().value();
 
+
+        List<String> skipPaths = Arrays.asList(
+                "/api/user/login",
+                "/api/interfaceInvoke/**"
+        );
+
         // 跳过特定路径
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        if (pathMatcher.match("/api/user/login", webPath)) {
-            log.info("SessionExpireFilter Skip成功");
+        // 使用 Stream 判断是否匹配任何路径
+        if (skipPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, webPath)) &&
+                !pathMatcher.match("/api/interfaceInvoke/extend", webPath)) {
+            log.info("SessionExpireFilter Skip成功: {}", webPath);
             return chain.filter(exchange);
         }
 

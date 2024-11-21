@@ -36,6 +36,7 @@ public class QiApiClient {
         return result;
     }
 
+    // TODO 这里由于没有token会被认为未登录
     public String getRandomEncouragement() {
         HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/interfaceInvoke/random/encouragement")
                 .addHeaders(getHeaderMap(accessKey, secretKey))

@@ -1,5 +1,9 @@
 package com.rickey.backend.controller;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,6 +16,7 @@ import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.rickey.backend.model.enums.InterfaceInfoStatusEnum;
 import com.rickey.backend.service.InterfaceInfoService;
 import com.rickey.backend.service.UserService;
+import com.rickey.backend.utils.RedisUtil;
 import com.rickey.clientSDK.client.QiApiClient;
 import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
@@ -21,7 +26,7 @@ import com.rickey.common.common.IdRequest;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
-import com.rickey.common.model.entity.User;
+import com.rickey.common.utils.CookieUtil;
 import com.rickey.common.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +52,12 @@ public class InterfaceInfoController {
 
     private static final String CACHE_KEY_PREFIX_INTERFACE_PAGE = "interfaceInfoPage:";
 
+    private static final String CACHE_KEY_PREFIX_INTERFACE_ADMIN = "interfaceInfoListGetByAdmin";
+
+    private final static String COOKIE_NAME = "rickey_login_token";
+
+    private static final String GATEWAY_HOST = "http://localhost:8090";
+
     @Resource
     private InterfaceInfoService interfaceInfoService;
 
@@ -59,9 +70,10 @@ public class InterfaceInfoController {
     @Resource
     private RedisTemplate redisTemplate;
 
-    // region 增删改查
+    @Resource
+    private RedisUtil redisUtil;
 
-    // TODO 获取用户登录状态要改变
+    // region 增删改查
 
     /**
      * 创建
@@ -79,13 +91,17 @@ public class InterfaceInfoController {
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
         // 校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true);
-        User loginUser = userService.getLoginUser(request);
-        interfaceInfo.setUserId(loginUser.getId());
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        interfaceInfo.setUserId(userId);
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         long newInterfaceInfoId = interfaceInfo.getId();
+        // 删除先前的缓存
+        String interfaceInfoCache = CACHE_KEY_PREFIX_INTERFACE + interfaceInfo.getId();
+        String interfaceInfoPageCache = CACHE_KEY_PREFIX_INTERFACE_PAGE;
+        redisUtil.del(interfaceInfoCache, interfaceInfoPageCache, CACHE_KEY_PREFIX_INTERFACE_ADMIN);
         return ResultUtils.success(newInterfaceInfoId);
     }
 
@@ -101,18 +117,21 @@ public class InterfaceInfoController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
-        long id = deleteRequest.getId();
+        Long userId = Long.valueOf(request.getHeader("userId"));
         // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(userId);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可删除
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldInterfaceInfo.getUserId().equals(userId) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        boolean b = interfaceInfoService.removeById(id);
+        boolean b = interfaceInfoService.removeById(userId);
+        // 删除先前的缓存
+        String interfaceInfoCache = CACHE_KEY_PREFIX_INTERFACE + oldInterfaceInfo.getId();
+        String interfaceInfoPageCache = CACHE_KEY_PREFIX_INTERFACE_PAGE;
+        redisUtil.del(interfaceInfoCache, interfaceInfoPageCache, CACHE_KEY_PREFIX_INTERFACE_ADMIN);
         return ResultUtils.success(b);
     }
 
@@ -133,18 +152,21 @@ public class InterfaceInfoController {
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
         // 参数校验
         interfaceInfoService.validInterfaceInfo(interfaceInfo, false);
-        User user = userService.getLoginUser(request);
-        long id = interfaceInfoUpdateRequest.getId();
+        Long userId = Long.valueOf(request.getHeader("userId"));
         // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(userId);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 仅本人或管理员可修改
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldInterfaceInfo.getUserId().equals(userId) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+        // 删除先前的缓存
+        String interfaceInfoCache = CACHE_KEY_PREFIX_INTERFACE + interfaceInfo.getId();
+        String interfaceInfoPageCache = CACHE_KEY_PREFIX_INTERFACE_PAGE;
+        redisUtil.del(interfaceInfoCache, interfaceInfoPageCache, CACHE_KEY_PREFIX_INTERFACE_ADMIN);
         return ResultUtils.success(result);
     }
 
@@ -170,12 +192,12 @@ public class InterfaceInfoController {
         interfaceInfo = interfaceInfoService.getById(id);
         log.info(interfaceInfo.toString());
         // 加入缓存
-        //redisTemplate.opsForValue().set(cacheKey, interfaceInfo);
+        redisUtil.set(cacheKey, interfaceInfo, 300);
         return ResultUtils.success(interfaceInfo);
     }
 
     /**
-     * 获取列表（仅管理员可使用）
+     * 获取接口列表（仅管理员可使用）
      *
      * @param interfaceInfoQueryRequest
      * @return
@@ -183,8 +205,8 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     @GetMapping("/list")
     public BaseResponse<List<InterfaceInfo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
-        String cacheKey = "interfaceInfoList";
-        List<InterfaceInfo> interfaceInfoList = (List<InterfaceInfo>) redisTemplate.opsForValue().get(cacheKey);
+        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_ADMIN;
+        List<InterfaceInfo> interfaceInfoList = (List<InterfaceInfo>) redisUtil.get(cacheKey);
         if (interfaceInfoList != null) {
             return ResultUtils.success(interfaceInfoList);
         }
@@ -194,7 +216,7 @@ public class InterfaceInfoController {
         }
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>(interfaceInfoQuery);
         interfaceInfoList = interfaceInfoService.list(queryWrapper);
-        redisTemplate.opsForValue().set(cacheKey, interfaceInfoList);
+        redisUtil.set(cacheKey, interfaceInfoList, 300);
         return ResultUtils.success(interfaceInfoList);
     }
 
@@ -219,10 +241,11 @@ public class InterfaceInfoController {
         String description = interfaceInfoQueryRequest.getDescription();
 
         // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_PAGE + current + ":" + size + ":" + description + ":" + sortField + ":" + sortOrder;
+        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_PAGE;
 
         // 尝试从缓存中获取数据
-        Page<InterfaceInfo> interfaceInfoPage = (Page<InterfaceInfo>) redisTemplate.opsForValue().get(cacheKey);
+        Page<InterfaceInfo> interfaceInfoPage = (Page<InterfaceInfo>) redisUtil.get(cacheKey);
+        System.out.println("interfaceInfoPage = " + interfaceInfoPage);
         if (interfaceInfoPage != null) {
             return ResultUtils.success(interfaceInfoPage); // 返回缓存中的数据
         }
@@ -246,7 +269,7 @@ public class InterfaceInfoController {
         interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
 
         // 将数据放入缓存
-        redisTemplate.opsForValue().set(cacheKey, interfaceInfoPage);
+        redisUtil.set(cacheKey, interfaceInfoPage, 300);
 
         return ResultUtils.success(interfaceInfoPage);
     }
@@ -344,10 +367,9 @@ public class InterfaceInfoController {
         if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
         }
-
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        String accessKey = request.getHeader("accessKey");
+        String secretKey = request.getHeader("secretKey");
 
         QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
         Gson gson = new Gson();
@@ -367,13 +389,48 @@ public class InterfaceInfoController {
             fallback = "fallbackGET", fallbackClass = SentinelConfig.class)
     @GetMapping("/random/encouragement")
     public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
+        String accessKey = request.getHeader("accessKey");
+        System.out.println("accessKey = " + accessKey);
+        String secretKey = request.getHeader("secretKey");
+        System.out.println("secretKey = " + secretKey);
+        String cookieValue = CookieUtil.getCookieValue(request, COOKIE_NAME);
+        if (StrUtil.isNotBlank(cookieValue)) {
+            // 如果获取到 Token，则调用延长过期时间的方法
+            String gatewayResponse = extendSessionExpireTime(cookieValue);
+            System.out.println("延长会话结果: " + gatewayResponse);
+        }
+        // 得到了token，准备调用延长过期时间的方法
         QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
         String randomEncouragement = tempClient.getRandomEncouragement();
+        System.out.println("randomEncouragement = " + randomEncouragement);
         System.out.println("接口调用转发");
         return ResultUtils.success(randomEncouragement);
+    }
+
+    /**
+     * 向网关发送请求延长 Session 过期时间
+     *
+     * @param token 用户的 Session Token
+     * @return 返回网关的响应内容
+     */
+    public String extendSessionExpireTime(String token) {
+        try {
+            // 使用 HttpRequest 构造 GET 请求
+            HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/interfaceInvoke/extend")
+                    .cookie(COOKIE_NAME + "=" + token)
+                    .execute();
+
+            // 处理响应
+            if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
+                System.out.println("Session 延长成功，状态码：" + httpResponse.getStatus());
+            } else {
+                System.out.println("Session 延长失败，状态码：" + httpResponse.getStatus());
+            }
+            return httpResponse.body(); // 返回网关的响应内容
+        } catch (Exception e) {
+            System.err.println("调用网关接口延长 Session 时间失败：" + e.getMessage());
+            return "Error: " + e.getMessage();
+        }
     }
 
 }

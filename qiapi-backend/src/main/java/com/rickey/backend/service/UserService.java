@@ -2,7 +2,6 @@ package com.rickey.backend.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,15 +30,7 @@ public interface UserService extends IService<User> {
      */
     User userLogin(String userAccount, String userPassword);
 
-    /**
-     * 获取当前登录用户
-     *
-     * @param request
-     * @return
-     */
-    User getLoginUser(HttpServletRequest request);
 
-    User getLoginUser(RequestDTO requestDTO);
 
     /**
      * 是否为管理员

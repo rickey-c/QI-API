@@ -60,17 +60,13 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
-        if (innerUserService == null) {
-            log.error("innerUserService 为空 ");
-        }
-
         ServerHttpRequest request = exchange.getRequest();
         String webPath = request.getPath().value();
 
         // 只在路径为 /api/interfaceInvoke/** 时进行过滤
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        if (!pathMatcher.match("/api/interfaceInvoke/**", webPath)) {
+        if (pathMatcher.match("/api/interfaceInvoke/extend", webPath) ||
+                !pathMatcher.match("/api/interfaceInvoke/**", webPath)) {
             log.info("InterfaceInvokeFilter Skip成功");
             return chain.filter(exchange);
         }

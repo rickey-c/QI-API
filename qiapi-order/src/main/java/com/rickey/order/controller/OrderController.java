@@ -10,18 +10,17 @@ import com.rickey.common.common.DeleteRequest;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
-import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.Order;
-import com.rickey.common.service.InnerUserService;
 import com.rickey.common.utils.ResultUtils;
 import com.rickey.order.model.dto.order.OrderAddRequest;
 import com.rickey.order.model.dto.order.OrderQueryRequest;
 import com.rickey.order.model.dto.order.OrderUpdateRequest;
 import com.rickey.order.service.OrderService;
+import com.rickey.order.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,9 +39,6 @@ public class OrderController {
     @Resource
     private OrderService orderService;
 
-    @DubboReference
-    private InnerUserService innerUserService; // 用户服务接口
-
     @Resource
     private RedisTemplate redisTemplate;
 
@@ -52,6 +48,8 @@ public class OrderController {
     private static final String CACHE_KEY_PREFIX_ORDER = "order:";
 
     private static final String CACHE_KEY_PREFIX_ORDER_PAGE = "orderPage:";
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 创建
@@ -156,7 +154,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<Order> getOrderById(long id) {
+    public BaseResponse<Order> getOrderById(Long id) {
         // 先进行合法性判断
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -212,25 +210,10 @@ public class OrderController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long current = orderQueryRequest.getCurrent();
-        System.out.println("current = " + current);
         long size = orderQueryRequest.getPageSize();
-        System.out.println("size = " + size);
         String sortField = "id";
-        System.out.println("sortField = " + sortField);
         String sortOrder = orderQueryRequest.getSortOrder();
-        System.out.println("sortOrder = " + sortOrder);
         Long userId = Long.valueOf(request.getHeader("userId"));
-        System.out.println("userId = " + userId);
-        String accessKey = request.getHeader("accessKey");
-        System.out.println("accessKey = " + accessKey);
-
-        // innerUserService.getUserByToken()
-//        User loginUser = innerUserService.getLoginUser(request);
-//        Long userId = loginUser.getId();
-        // TODO 后期使用JWT去获取userId
-        RequestDTO requestDTO = new RequestDTO(request.getCookies());
-        // User loginUser = innerUserService.getLoginUser(requestDTO);
-        System.out.println("userId = " + userId);
 
         // 检查 orderQueryRequest 的字段
         if (orderQueryRequest.getCurrent() == null || orderQueryRequest.getPageSize() == null) {
@@ -255,7 +238,6 @@ public class OrderController {
         orderQuery.setUserId(userId);
 
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>(orderQuery);
-        // queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 CommonConstant.SORT_ORDER_ASC.equals(sortOrder), sortField);
 
@@ -264,7 +246,8 @@ public class OrderController {
         System.out.println("orderPage from MySQL = " + orderPage);
 
         // 将数据放入缓存
-        redisTemplate.opsForValue().set(cacheKey, orderPage);
+        boolean set = redisUtil.set(cacheKey, orderPage);
+        System.out.println("set = " + set);
 
         return ResultUtils.success(orderPage);
     }

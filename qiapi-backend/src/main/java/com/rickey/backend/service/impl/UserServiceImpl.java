@@ -1,7 +1,6 @@
 package com.rickey.backend.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,9 +11,7 @@ import com.rickey.backend.service.UserService;
 import com.rickey.backend.utils.RedisUtil;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
-import com.rickey.common.model.dto.request.RequestDTO;
 import com.rickey.common.model.entity.User;
-import com.rickey.common.utils.CookieUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -113,45 +110,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user;
     }
 
-    /**
-     * 获取当前登录用户
-     *
-     * @param request
-     * @return
-     */
-    @Override
-    public User getLoginUser(HttpServletRequest request) {
-        // 先判断是否已登录
-        // 从request中查询用户登录信息
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return currentUser;
-    }
-
-    @Override
-    public User getLoginUser(RequestDTO requestDTO) {
-        // 先判断是否已登录
-        // 从request中查询用户登录信息
-        //读取sessionID
-        String loginToken = CookieUtil.readLoginToken(requestDTO);
-        if (StrUtil.isBlank(loginToken)) {
-            return null;
-        }
-        //从Redis中获取用户的json数据
-        String userJson = (String) redisUtil.get(loginToken);
-        //json转换成Use对象
-        User user = JSONUtil.toBean(userJson, User.class);
-        return user;
-    }
 
     /**
      * 是否为管理员
@@ -175,7 +133,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public boolean userLogout(HttpServletRequest request) {
         // 移除登录态
-        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
     }
 
