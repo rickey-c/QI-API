@@ -35,5 +35,16 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
         return interfaceInfoMapper.selectOne(queryWrapper);
     }
 
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public InterfaceInfo getInterfaceInfo(Long id) {
+        QueryWrapper<InterfaceInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("id", id);
+        return interfaceInfoMapper.selectOne(wrapper);
+    }
+
 
 }

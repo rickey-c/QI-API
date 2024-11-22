@@ -30,25 +30,39 @@ public class LogInterceptor {
         // 计时
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+
         // 获取请求路径
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest httpServletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+
         // 生成请求唯一 id
         String requestId = UUID.randomUUID().toString();
         String url = httpServletRequest.getRequestURI();
+
         // 获取请求参数
         Object[] args = point.getArgs();
         String reqParam = "[" + StringUtils.join(args, ", ") + "]";
+
         // 输出请求日志
         log.info("request start，id: {}, path: {}, ip: {}, params: {}", requestId, url,
                 httpServletRequest.getRemoteHost(), reqParam);
+
         // 执行原方法
-        Object result = point.proceed();
+        Object result;
+        try {
+            result = point.proceed();
+        } catch (Throwable ex) {
+            log.error("request error, id: {}, path: {}, error: {}", requestId, url, ex.getMessage());
+            throw ex;
+        }
+
         // 输出响应日志
         stopWatch.stop();
         long totalTimeMillis = stopWatch.getTotalTimeMillis();
-        log.info("request end, id: {}, cost: {}ms", requestId, totalTimeMillis);
+        log.info("request end, id: {}, cost: {}ms, response: {}", requestId, totalTimeMillis, result);
+
         return result;
     }
+
 }
 

@@ -155,11 +155,13 @@ public class UserController {
             return ResultUtils.error(402, "用户未登录");
         }
         //从Redis中获取用户的json数据
-        String userJson = (String) redisUtil.get(loginToken);
+        String userJson = (String) redisUtil.get("session:" + loginToken);
+        // log.info("getLoginUser:UserJson:{}",userJson);
         //json转换成Use对象
         User user = JSONUtil.toBean(userJson, User.class);
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
+        // log.info("getLoginUser:UserVo:{}",userJson);
         return ResultUtils.success(userVO);
     }
 

@@ -10,7 +10,9 @@ import com.rickey.common.common.DeleteRequest;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
+import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.model.entity.Order;
+import com.rickey.common.service.InnerInterfaceInfoService;
 import com.rickey.common.utils.ResultUtils;
 import com.rickey.order.model.dto.order.OrderAddRequest;
 import com.rickey.order.model.dto.order.OrderQueryRequest;
@@ -19,13 +21,14 @@ import com.rickey.order.service.OrderService;
 import com.rickey.order.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -43,13 +46,18 @@ public class OrderController {
     private RedisTemplate redisTemplate;
 
     @Resource
+    private RedisUtil redisUtil;
+
+    @Resource
     private PayClient payClient;
+
+    @DubboReference
+    private InnerInterfaceInfoService interfaceInfoService;
 
     private static final String CACHE_KEY_PREFIX_ORDER = "order:";
 
     private static final String CACHE_KEY_PREFIX_ORDER_PAGE = "orderPage:";
-    @Autowired
-    private RedisUtil redisUtil;
+
 
     /**
      * 创建
@@ -101,8 +109,10 @@ public class OrderController {
         }
         Long userId = Long.valueOf(request.getHeader("userId"));
         String userRole = request.getHeader("userRole");
+        Long orderId = deleteRequest.getId();
+        System.out.println("orderId = " + orderId);
         // 判断是否存在
-        Order oldOrder = orderService.getById(userId);
+        Order oldOrder = orderService.getById(orderId);
         if (oldOrder == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
@@ -110,7 +120,7 @@ public class OrderController {
         if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        boolean b = orderService.removeById(userId);
+        boolean b = orderService.removeById(orderId);
         return ResultUtils.success(b);
     }
 
@@ -143,7 +153,13 @@ public class OrderController {
         if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        Long interfaceId = order.getInterfaceId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getInterfaceInfo(interfaceId);
+        BigDecimal costPerCall = interfaceInfo.getCostPerCall();
+        Integer quantity = order.getQuantity();
+        order.setTotalPrice(costPerCall.multiply(BigDecimal.valueOf(quantity)));
         boolean result = orderService.updateById(order);
+        redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE, "orderList");
         return ResultUtils.success(result);
     }
 
@@ -221,7 +237,7 @@ public class OrderController {
         }
 
         // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE + current + ":" + size + ":" + sortField + ":" + sortOrder;
+        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE;
 
         // 尝试从缓存中获取数据
         Page<Order> orderPage = (Page<Order>) redisTemplate.opsForValue().get(cacheKey);

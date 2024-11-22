@@ -56,8 +56,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String webPath = request.getPath().value();
-
-
+        log.info("SessionExpireFilter:请求路径:{}", webPath);
         List<String> skipPaths = Arrays.asList(
                 "/api/user/login",
                 "/api/interfaceInvoke/**"
@@ -82,6 +81,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
                 // 从 Redis 中获取用户数据
                 User user = getUserByToken(loginToken);
                 if (user != null) {
+                    log.info("token验证成功，正在刷新expire时间...");
                     // 重置 Redis 中的过期时间
                     redisUtil.expire("session:" + loginToken, 600);
                     redisUtil.expire("token:user:" + user.getId(), 600);
@@ -96,6 +96,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
                             .build();
 
                     // 使用修改后的请求继续链式调用
+                    log.info("刷新expire时间成功，转发请求");
                     return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 } else {
                     log.warn("无效的 Token 或用户信息已过期，Token: {}", loginToken);

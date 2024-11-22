@@ -45,7 +45,7 @@ public class CookieUtil {
         if (cookies != null) {
             //遍历cookie，取出我们自己的cookie，根据name获取
             for (Cookie cookie : cookies) {
-                log.info("读取cookie cookieName{},cookieValue{}", cookie.getName(), cookie.getValue());
+                log.info("读取cookie cookieName:{},cookieValue:{}", cookie.getName(), cookie.getValue());
                 //获取自己的
                 if (StrUtil.equals(cookie.getName(), COOKIE_NAME)) {
                     //获取值
