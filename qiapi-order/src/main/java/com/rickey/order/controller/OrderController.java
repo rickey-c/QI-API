@@ -72,19 +72,10 @@ public class OrderController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Long userId = Long.valueOf(request.getHeader("userId"));
-        System.out.println("userId = " + userId);
-        String userRole = request.getHeader("userRole");
-        System.out.println("userRole = " + userRole);
-        String accessKey = request.getHeader("accessKey");
-        System.out.println("accessKey = " + accessKey);
-        String secretKey = request.getHeader("secretKey");
-        System.out.println("secretKey = " + secretKey);
-
         Order order = new Order();
         BeanUtils.copyProperties(orderAddRequest, order);
         // 手动填入当前用户的Id
         order.setUserId(Long.valueOf(userId));
-
         // 校验
         orderService.validOrder(order, true);
         boolean result = orderService.save(order);
@@ -92,6 +83,8 @@ public class OrderController {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         long newOrderId = order.getId();
+        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId);
+        log.info("添加订单，删除缓存，结果:{}", del);
         return ResultUtils.success(newOrderId);
     }
 
@@ -120,7 +113,10 @@ public class OrderController {
         if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId);
+        log.info("删除订单，删除缓存，结果:{}", del);
         boolean b = orderService.removeById(orderId);
+        log.info("删除订单，删除数据库，结果:{}", b);
         return ResultUtils.success(b);
     }
 
@@ -158,8 +154,11 @@ public class OrderController {
         BigDecimal costPerCall = interfaceInfo.getCostPerCall();
         Integer quantity = order.getQuantity();
         order.setTotalPrice(costPerCall.multiply(BigDecimal.valueOf(quantity)));
+
+        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId, "orderList");
+        log.info("更新订单，删除缓存，结果:{}", del);
         boolean result = orderService.updateById(order);
-        redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE, "orderList");
+        log.info("更新订单，更新数据库，结果:{}", result);
         return ResultUtils.success(result);
     }
 
@@ -177,14 +176,15 @@ public class OrderController {
         }
         // 查缓存
         String cacheKey = CACHE_KEY_PREFIX_ORDER + id;
-        Order order = (Order) redisTemplate.opsForValue().get(cacheKey);
+        Order order = (Order) redisUtil.get(cacheKey);
         if (order != null) {
             return ResultUtils.success(order); // 返回缓存中的数据
         }
         // 缓存查不到，查数据库
         order = orderService.getById(id);
         // 加入缓存
-        redisTemplate.opsForValue().set(cacheKey, order);
+        redisUtil.set(cacheKey, order, 300);
+        log.info("查询订单，加入缓存:{}", order);
         return ResultUtils.success(order);
     }
 
@@ -198,7 +198,7 @@ public class OrderController {
     @GetMapping("/list")
     public BaseResponse<List<Order>> listOrder(OrderQueryRequest orderQueryRequest) {
         String cacheKey = "orderList";
-        List<Order> orderList = (List<Order>) redisTemplate.opsForValue().get(cacheKey);
+        List<Order> orderList = (List<Order>) redisUtil.get(cacheKey);
         if (orderList != null) {
             return ResultUtils.success(orderList);
         }
@@ -208,7 +208,8 @@ public class OrderController {
         }
         QueryWrapper<Order> queryWrapper = new QueryWrapper<>(orderQuery);
         orderList = orderService.list(queryWrapper);
-        redisTemplate.opsForValue().set(cacheKey, orderList);
+        redisUtil.set(cacheKey, orderList, 300);
+        log.info("管理员查询订单，加入缓存:{}", orderList);
         return ResultUtils.success(orderList);
     }
 
@@ -237,11 +238,11 @@ public class OrderController {
         }
 
         // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE;
+        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE + userId;
 
         // 尝试从缓存中获取数据
-        Page<Order> orderPage = (Page<Order>) redisTemplate.opsForValue().get(cacheKey);
-        System.out.println("orderPage from redis = " + orderPage);
+        Page<Order> orderPage = (Page<Order>) redisUtil.get(cacheKey);
+        log.info("用户从缓存中查自己的订单:{}", orderPage);
         if (orderPage != null) {
             return ResultUtils.success(orderPage); // 返回缓存中的数据
         }
@@ -262,9 +263,8 @@ public class OrderController {
         System.out.println("orderPage from MySQL = " + orderPage);
 
         // 将数据放入缓存
-        boolean set = redisUtil.set(cacheKey, orderPage);
-        System.out.println("set = " + set);
-
+        boolean set = redisUtil.set(cacheKey, orderPage, 300);
+        log.info("用户缓存自己的订单数据:{},结果:{}", orderPage, set);
         return ResultUtils.success(orderPage);
     }
 
