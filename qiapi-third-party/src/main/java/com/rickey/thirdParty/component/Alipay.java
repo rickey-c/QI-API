@@ -7,6 +7,7 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.rickey.thirdParty.config.AliPayConfig;
 import com.rickey.thirdParty.model.entity.AliPayInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
  * @Description: 调用支付宝支付的组件
  */
 @Component
+@Slf4j
 public class Alipay {
 
     @Resource
@@ -37,18 +39,24 @@ public class Alipay {
         String appId = alipayConfig.getAppId();
         // 商户私钥, 即PKCS8格式RSA2私钥
         String privateKey = alipayConfig.getPrivateKey();
+        log.info("商户私钥:{}", privateKey);
         // 格式化为 json 格式
-        String format = "json";
+        String format = "JSON";
         // 字符编码格式
         String charset = alipayConfig.getCharset();
+        log.info("字符编码格式:{}", charset);
         // 支付宝公钥, 即对应APPID下的支付宝公钥
         String alipayPublicKey = alipayConfig.getPublicKey();
+        log.info("支付宝公钥:{}", alipayPublicKey);
         // 签名方式
         String signType = alipayConfig.getSignType();
+        log.info("签名方式:{}", signType);
         // 页面跳转同步通知页面路径
         String returnUrl = alipayConfig.getReturnUrl();
+        log.info("returnUrl:{}", returnUrl);
         // 服务器异步通知页面路径
         String notifyUrl = alipayConfig.getNotifyUrl();
+        log.info("notifyUrl:{}", notifyUrl);
 
         // 1、获得初始化的AlipayClient
         AlipayClient alipayClient = new DefaultAlipayClient(
