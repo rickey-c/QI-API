@@ -34,4 +34,17 @@ public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfo
         return userInterfaceInfoService.getApiRemainingCalls(interfaceInfoId, userId);
     }
 
+    /**
+     * @param interfaceInfoId
+     * @param userId
+     * @param calls
+     * @return
+     * @description 增加接口调用次数
+     */
+    @Override
+    public boolean addApiRemainingCall(long interfaceInfoId, long userId, int calls) {
+
+        return true;
+    }
+
 }

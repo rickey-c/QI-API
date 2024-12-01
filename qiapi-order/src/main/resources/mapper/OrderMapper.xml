@@ -22,4 +22,12 @@
     quantity, totalPrice, status,
     createTime, updateTime, isDeleted
     </sql>
+
+    <update id="updateOrderStatus">
+        UPDATE `order`
+        SET status = 1
+        WHERE id = #{orderId}
+    </update>
+
+
 </mapper>

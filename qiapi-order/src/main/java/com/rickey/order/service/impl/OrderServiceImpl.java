@@ -9,12 +9,17 @@ import com.rickey.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 
 @Slf4j
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         implements OrderService {
+
+    @Resource
+    private OrderMapper orderMapper;
+
     /**
      * @param order
      * @param add
@@ -64,6 +69,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         if (totalPrice.scale() > 2) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "总价格最多只能有两位小数");
         }
+    }
+
+    /**
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean updateOrderStatus(Long orderId) {
+        if (orderId == null || orderId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "订单ID非法");
+        }
+        return orderMapper.updateOrderStatus(orderId);
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public Order getOrderById(Long id) {
+        return orderMapper.selectById(id);
     }
 
 }

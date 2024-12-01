@@ -10,6 +10,7 @@ import com.rickey.common.model.entity.Order;
  */
 public interface OrderMapper extends BaseMapper<Order> {
 
+    boolean updateOrderStatus(Long orderId);
 }
 
 

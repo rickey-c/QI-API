@@ -226,6 +226,7 @@ public class OrderController {
         if (orderQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 当前的页数
         long current = orderQueryRequest.getCurrent();
         long size = orderQueryRequest.getPageSize();
         String sortField = "id";
@@ -235,16 +236,6 @@ public class OrderController {
         // 检查 orderQueryRequest 的字段
         if (orderQueryRequest.getCurrent() == null || orderQueryRequest.getPageSize() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "分页参数不能为空");
-        }
-
-        // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_ORDER_PAGE + userId;
-
-        // 尝试从缓存中获取数据
-        Page<Order> orderPage = (Page<Order>) redisUtil.get(cacheKey);
-        log.info("用户从缓存中查自己的订单:{}", orderPage);
-        if (orderPage != null) {
-            return ResultUtils.success(orderPage); // 返回缓存中的数据
         }
 
         // description 需支持模糊搜索
@@ -259,46 +250,10 @@ public class OrderController {
                 CommonConstant.SORT_ORDER_ASC.equals(sortOrder), sortField);
 
         // 从数据库获取数据
-        orderPage = orderService.page(new Page<>(current, size), queryWrapper);
+        Page<Order> orderPage = orderService.page(new Page<>(current, size), queryWrapper);
         System.out.println("orderPage from MySQL = " + orderPage);
 
-        // 将数据放入缓存
-        boolean set = redisUtil.set(cacheKey, orderPage, 300);
-        log.info("用户缓存自己的订单数据:{},结果:{}", orderPage, set);
         return ResultUtils.success(orderPage);
-    }
-
-    /**
-     * 支付订单
-     *
-     * @param orderUpdateRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/pay")
-    public BaseResponse<Boolean> payOrder(@RequestBody OrderUpdateRequest orderUpdateRequest,
-                                          HttpServletRequest request) {
-        if (orderUpdateRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        Order order = new Order();
-        BeanUtils.copyProperties(orderUpdateRequest, order);
-        // 参数校验
-        orderService.validOrder(order, false);
-        Long userId = Long.valueOf(request.getHeader("userId"));
-        String userRole = request.getHeader("userRole");
-        long id = orderUpdateRequest.getId();
-        // 判断是否存在
-        Order oldOrder = orderService.getById(id);
-        if (oldOrder == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        // 仅本人或管理员可修改
-        if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        boolean result = orderService.updateById(order);
-        return ResultUtils.success(result);
     }
 
 }

@@ -2,7 +2,6 @@ package com.rickey.backend.service.impl.inner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.rickey.backend.mapper.InterfaceInfoMapper;
-import com.rickey.backend.service.InterfaceInfoService;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
@@ -21,8 +20,6 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
     @Resource
     private InterfaceInfoMapper interfaceInfoMapper;
 
-    @Resource
-    private InterfaceInfoService interfaceInfoService;
 
     @Override
     public InterfaceInfo getInterfaceInfo(String url, String method) {
