@@ -113,10 +113,10 @@ public class OrderController {
         if (!oldOrder.getUserId().equals(userId) && !userRole.equals("admin")) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId);
-        log.info("删除订单，删除缓存，结果:{}", del);
         boolean b = orderService.removeById(orderId);
         log.info("删除订单，删除数据库，结果:{}", b);
+        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId);
+        log.info("删除订单，删除缓存，结果:{}", del);
         return ResultUtils.success(b);
     }
 
@@ -154,11 +154,10 @@ public class OrderController {
         BigDecimal costPerCall = interfaceInfo.getCostPerCall();
         Integer quantity = order.getQuantity();
         order.setTotalPrice(costPerCall.multiply(BigDecimal.valueOf(quantity)));
-
-        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId, "orderList");
-        log.info("更新订单，删除缓存，结果:{}", del);
         boolean result = orderService.updateById(order);
         log.info("更新订单，更新数据库，结果:{}", result);
+        boolean del = redisUtil.del(CACHE_KEY_PREFIX_ORDER_PAGE + userId, "orderList");
+        log.info("更新订单，删除缓存，结果:{}", del);
         return ResultUtils.success(result);
     }
 

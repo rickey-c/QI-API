@@ -241,7 +241,7 @@ public class InterfaceInfoController {
         String description = interfaceInfoQueryRequest.getDescription();
 
         // 生成缓存键
-        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_PAGE;
+        String cacheKey = CACHE_KEY_PREFIX_INTERFACE_PAGE + current;
 
         // 尝试从缓存中获取数据
         Page<InterfaceInfo> interfaceInfoPage = (Page<InterfaceInfo>) redisUtil.get(cacheKey);
