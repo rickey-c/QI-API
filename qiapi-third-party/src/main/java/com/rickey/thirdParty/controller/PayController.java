@@ -7,7 +7,9 @@ import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.Order;
+import com.rickey.common.model.entity.UserInterfaceInfo;
 import com.rickey.common.service.InnerOrderService;
+import com.rickey.common.service.InnerUserInterfaceInfoService;
 import com.rickey.common.utils.ResultUtils;
 import com.rickey.thirdParty.common.AlipayTradeStatus;
 import com.rickey.thirdParty.config.AliPayConfig;
@@ -50,6 +52,9 @@ public class PayController {
     @DubboReference
     private InnerOrderService innerOrderService;
 
+    @DubboReference
+    private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
+
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
@@ -57,6 +62,8 @@ public class PayController {
     private AliPayConfig aliPayConfig;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(20);
+
+    private final String DEAD_LETTER_TOPIC = "%DLQ%order-topic:sendUpdateMessage";
 
     /**
      * 支付宝支付 api
@@ -135,16 +142,27 @@ public class PayController {
                                             .build(), new SendCallback() {
                                         @Override
                                         public void onSuccess(SendResult sendResult) {
-                                            // TODO增加接口调用次数
-
                                             // 处理消息发送成功逻辑
-                                            log.info("更新订单状态，消息发送成功");
+                                            log.info("更新订单状态消息发送成功");
+                                            // TODO增加接口调用次数
+                                            Order order = innerOrderService.getOrderById(Long.valueOf(orderId));
+                                            Long userId = order.getUserId();
+                                            Long interfaceId = order.getInterfaceId();
+                                            Integer increment = order.getQuantity();
+                                            UserInterfaceInfo userInterfaceInfo = innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceId);
+                                            Integer leftNum = userInterfaceInfo.getLeftNum();
+                                            boolean updateLeftNum = innerUserInterfaceInfoService.updateLeftNum(interfaceId, userId, leftNum, increment);
+                                            if (!updateLeftNum) {
+                                                log.info("更新调用次数失败");
+                                            }
+                                            log.debug("更新接口调用次数成功");
                                         }
 
                                         @Override
                                         public void onException(Throwable throwable) {
-                                            // 处理消息发送异常逻辑
-                                            log.info("更新订单状态，消息发送失败");
+                                            // 处理消息发送异常逻辑,加入死信队列人工处理
+                                            sendToDeadLetterQueue(DEAD_LETTER_TOPIC, throwable.getMessage());
+                                            log.info("更新订单状态消息发送失败");
                                             throw new RuntimeException(throwable);
                                         }
                                     });
@@ -241,5 +259,10 @@ public class PayController {
         if (!params.get("app_id").equals(aliPayConfig.getAppId())) {
             throw new AlipayApiException("app_id不一致");
         }
+    }
+
+    private void sendToDeadLetterQueue(String topic, String message) {
+        // 假设有一个死信队列服务
+        rocketMQTemplate.convertAndSend(DEAD_LETTER_TOPIC, message);
     }
 }

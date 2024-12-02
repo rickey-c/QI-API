@@ -22,4 +22,8 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
     boolean isLeftCount(long userId, long interfaceInfoId);
 
     int getApiRemainingCalls(long interfaceInfoId, long userId);
+
+    boolean updateLeftNum(long interfaceInfoId, long userId, int calls, int increment);
+
+    UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId);
 }

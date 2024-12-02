@@ -8,15 +8,21 @@ import com.rickey.backend.service.UserInterfaceInfoService;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.UserInterfaceInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * 用户接口信息服务实现类
  */
 @Service
+@Slf4j
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
         implements UserInterfaceInfoService {
 
+    @Resource
+    private UserInterfaceInfoMapper userInterfaceInfoMapper;
 
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
@@ -70,6 +76,60 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         queryWrapper.eq("interfaceInfoId", interfaceInfoId);
         UserInterfaceInfo userInterfaceInfo = this.getOne(queryWrapper);
         return userInterfaceInfo.getLeftNum();
+    }
+
+    /**
+     * @param interfaceInfoId
+     * @param userId
+     * @param calls
+     * @param increment
+     * @return
+     */
+    @Override
+    public boolean updateLeftNum(long interfaceInfoId, long userId, int leftNum, int increment) {
+        log.debug("interfaceInfoId={}, userId={}", interfaceInfoId, userId);
+        if (interfaceInfoId == 0 || userId <= 0) {
+            log.info("interfaceInfoId非法或者userId非法");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserInterfaceInfo userInterfaceInfo = getUserInterfaceInfo(interfaceInfoId, userId);
+        if (userInterfaceInfo == null) {
+            // 创建对应关系
+            UserInterfaceInfo newUserInterfaceInfo = new UserInterfaceInfo();
+            newUserInterfaceInfo.setUserId(userId);
+            newUserInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
+            newUserInterfaceInfo.setLeftNum(increment);
+            boolean save = save(newUserInterfaceInfo);
+            if (!save) {
+                log.debug("userInterfaceInfo保存失败");
+                return false;
+            }
+        } else {
+            // 直接增加接口调用次数
+            boolean updateLeftNumByIncrement = userInterfaceInfoMapper.
+                    updateLeftNumByIncrement(userInterfaceInfo.getId(), leftNum, increment);
+            if (!updateLeftNumByIncrement) {
+                log.debug("接口调用次数更新失败");
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId) {
+        QueryWrapper<UserInterfaceInfo> userInterfaceInfoQueryWrapper = new QueryWrapper<>();
+        userInterfaceInfoQueryWrapper.eq("userId", userId);
+        userInterfaceInfoQueryWrapper.eq("interfaceInfoId", interfaceInfoId);
+        UserInterfaceInfo userInterfaceInfo = this.getOne(userInterfaceInfoQueryWrapper);
+        if (userInterfaceInfo == null) {
+            log.info("查不到对应的接口信息");
+        }
+        return userInterfaceInfo;
     }
 
 

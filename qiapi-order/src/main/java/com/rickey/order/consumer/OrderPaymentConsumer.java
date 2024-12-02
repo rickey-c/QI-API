@@ -1,9 +1,7 @@
 package com.rickey.order.consumer;
 
-import com.rickey.common.service.InnerUserInterfaceInfoService;
 import com.rickey.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -19,13 +17,10 @@ public class OrderPaymentConsumer implements RocketMQListener<String> {
     @Resource
     private OrderService orderService;
 
-    @DubboReference
-    private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
-
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
-    private final String DEAD_LETTER_TOPIC = "%DLQ%order-topic";
+    private final String DEAD_LETTER_TOPIC = "%DLQ%order-topic:consumeUpdateMessage";
 
     /**
      * @param message
@@ -71,6 +66,6 @@ public class OrderPaymentConsumer implements RocketMQListener<String> {
 
     private void sendToDeadLetterQueue(String topic, String message) {
         // 假设有一个死信队列服务
-        rocketMQTemplate.convertAndSend(DEAD_LETTER_TOPIC, message);
+        rocketMQTemplate.convertAndSend(topic, message);
     }
 }

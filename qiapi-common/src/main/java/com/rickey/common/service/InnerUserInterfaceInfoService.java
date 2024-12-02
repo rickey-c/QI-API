@@ -1,5 +1,7 @@
 package com.rickey.common.service;
 
+import com.rickey.common.model.entity.UserInterfaceInfo;
+
 /**
  * 内部用户接口信息服务
  */
@@ -18,5 +20,7 @@ public interface InnerUserInterfaceInfoService {
 
     int getApiRemainingCalls(long interfaceInfoId, long userId);
 
-    boolean addApiRemainingCall(long interfaceInfoId, long userId, int calls);
+    boolean updateLeftNum(long interfaceInfoId, long userId, int leftNum, int increment);
+
+    UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId);
 }

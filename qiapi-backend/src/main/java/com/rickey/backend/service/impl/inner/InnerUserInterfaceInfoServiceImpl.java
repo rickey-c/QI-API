@@ -1,6 +1,7 @@
 package com.rickey.backend.service.impl.inner;
 
 import com.rickey.backend.service.UserInterfaceInfoService;
+import com.rickey.common.model.entity.UserInterfaceInfo;
 import com.rickey.common.service.InnerUserInterfaceInfoService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
@@ -37,14 +38,24 @@ public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfo
     /**
      * @param interfaceInfoId
      * @param userId
-     * @param calls
+     * @param leftNum
+     * @param increment
      * @return
-     * @description 增加接口调用次数
      */
     @Override
-    public boolean addApiRemainingCall(long interfaceInfoId, long userId, int calls) {
-
-        return true;
+    public boolean updateLeftNum(long interfaceInfoId, long userId, int leftNum, int increment) {
+        return userInterfaceInfoService.updateLeftNum(interfaceInfoId, userId, leftNum, increment);
     }
+
+    /**
+     * @param userId
+     * @param interfaceInfoId
+     * @return
+     */
+    @Override
+    public UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId) {
+        return userInterfaceInfoService.getUserInterfaceInfo(userId, interfaceInfoId);
+    }
+
 
 }
