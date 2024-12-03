@@ -61,5 +61,10 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      */
     private BigDecimal costPerCall;
 
+    /**
+     * 接口sdk
+     */
+    private String sdk;
+
     private static final long serialVersionUID = 1L;
 }

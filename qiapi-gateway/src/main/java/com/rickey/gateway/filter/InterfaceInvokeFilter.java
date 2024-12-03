@@ -1,4 +1,4 @@
-package com.rickey.gateway.qiapigateway;
+package com.rickey.gateway.filter;
 
 import cn.hutool.core.text.AntPathMatcher;
 import com.rickey.clientSDK.utils.SignUtils;
@@ -10,6 +10,7 @@ import com.rickey.common.service.InnerUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -28,7 +29,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -40,8 +40,7 @@ import java.util.concurrent.TimeUnit;
 @CrossOrigin(origins = "*")
 public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
-    @Resource
-    private RedisTemplate redisTemplate;
+    private final RedisTemplate redisTemplate;
 
     @DubboReference
     private InnerUserService innerUserService; // 用户服务接口
@@ -58,29 +57,35 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
     InterfaceInfo interfaceInfo = null;
 
+    @Autowired
+    public InterfaceInvokeFilter(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String webPath = request.getPath().value();
         log.info("InterfaceInvokeFilter:请求路径:{}", webPath);
+
         // 只在路径为 /api/interfaceInvoke/** 时进行过滤
         AntPathMatcher pathMatcher = new AntPathMatcher();
         if (pathMatcher.match("/api/interfaceInvoke/extend", webPath) ||
                 !pathMatcher.match("/api/interfaceInvoke/**", webPath)) {
-            log.info("InterfaceInvokeFilter Skip成功");
+            log.info("InterfaceInvokeFilter Skip成功, 当前路径不需要过滤");
             return chain.filter(exchange);
         }
 
         // 1. 请求日志记录
         String path = INTERFACE_HOST + request.getPath().value(); // 请求路径
         String method = request.getMethod().toString(); // 请求方法
-        log.info("请求唯一标识：" + request.getId());
-        log.info("请求路径：" + path);
-        log.info("请求方法：" + method);
-        log.info("请求参数：" + request.getQueryParams());
+        log.info("请求唯一标识：{}", request.getId());
+        log.info("请求路径：{}", path);
+        log.info("请求方法：{}", method);
+        log.info("请求参数：{}", request.getQueryParams());
         String sourceAddress = request.getLocalAddress().getHostString(); // 本地地址
-        log.info("请求来源地址：" + sourceAddress);
-        log.info("请求来源地址：" + request.getRemoteAddress()); // 远程地址
+        log.info("请求来源地址：{}", sourceAddress);
+        log.info("请求来源地址：{}", request.getRemoteAddress()); // 远程地址
         ServerHttpResponse response = exchange.getResponse();
 
         // 3. 用户鉴权（判断 ak、sk 是否合法）
@@ -91,68 +96,95 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         String sign = headers.getFirst("sign"); // 获取签名
         String body = headers.getFirst("body"); // 获取请求体
 
+        log.info("接收到请求的头部信息：accessKey = {}, nonce = {}, timestamp = {}, sign = {}, body = {}",
+                accessKey, nonce, timestamp, sign, body);
+
         // 从数据库中查找用户
         try {
             invokeUser = innerUserService.getInvokeUser(accessKey);
+            log.info("用户信息：{}", invokeUser); // 记录用户信息
         } catch (Exception e) {
-            log.error("getInvokeUser error", e);
+            log.error("获取用户信息失败", e);
         }
 
         // 如果用户不存在，返回未授权
         if (invokeUser == null) {
+            log.error("用户不存在，返回未授权");
             return handleNoAuth(response);
         }
 
         // 检查 nonce 是否有效
-        if (Long.parseLong(nonce) > 10000L) {
+        try {
+            long nonceValue = Long.parseLong(nonce);
+            if (nonceValue > 10000L) {
+                log.error("nonce 超过最大值，拒绝请求：nonce = {}", nonce);
+                return handleNoAuth(response);
+            }
+        } catch (NumberFormatException e) {
+            log.error("nonce 格式不正确", e);
             return handleNoAuth(response);
         }
 
         // 检查时间戳是否超时
-        Long currentTime = System.currentTimeMillis() / 1000;
-        final Long FIVE_MINUTES = 60 * 5L;
-        if ((currentTime - Long.parseLong(timestamp)) >= FIVE_MINUTES) {
+        try {
+            Long currentTime = System.currentTimeMillis() / 1000;
+            final Long FIVE_MINUTES = 60 * 5L;
+            if ((currentTime - Long.parseLong(timestamp)) >= FIVE_MINUTES) {
+                log.error("请求超时，时间戳超出有效范围：timestamp = {}", timestamp);
+                return handleNoAuth(response);
+            }
+        } catch (NumberFormatException e) {
+            log.error("时间戳格式不正确", e);
             return handleNoAuth(response);
         }
 
         // 从数据库中查找用户的 secretKey
         String secretKey = invokeUser.getSecretKey();
-        String serverSign = body == null ? SignUtils.genSign(secretKey) : SignUtils.genSign(body, secretKey);
+        String serverSign = SignUtils.genSign(body, secretKey);
 
         // 验证签名是否匹配
         if (sign == null || !sign.equals(serverSign)) {
+            log.error("签名验证失败，客户端签名：{}, 服务器生成签名：{}", sign, serverSign);
             return handleNoAuth(response);
         }
 
         // 4. 检查请求的接口是否存在，以及请求方法是否匹配
         try {
             interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(path, method);
+            log.info("接口信息：{}", interfaceInfo);
         } catch (Exception e) {
-            log.error("getInterfaceInfo error", e);
+            log.error("获取接口信息失败", e);
         }
 
         // 如果接口不存在，返回未授权
         if (interfaceInfo == null) {
+            log.error("接口不存在，path = {}, method = {}", path, method);
             return handleNoAuth(response);
         }
 
         // 根据UserInterfaceInfo表检查用户是否还有剩余的调用次数
         long remainingCalls = innerUserInterfaceInfoService.getApiRemainingCalls(interfaceInfo.getId(), invokeUser.getId());
+        log.info("剩余调用次数：{}", remainingCalls);
         if (remainingCalls <= 0) {
+            log.error("调用次数不足，接口：{}, 用户：{}", interfaceInfo.getId(), invokeUser.getId());
             return handleInvokeLimitError(response);
         }
 
         // 6.利用Redis做分布式锁，同一用户在同一时间只能调用一个接口
         String redisKey = invokeUser.getId() + ":invoke:" + interfaceInfo.getId(); // 生成 Redis Key
         Boolean b = redisTemplate.opsForValue().setIfAbsent(redisKey, String.valueOf(remainingCalls), 10, TimeUnit.SECONDS);
+        log.info("尝试获取 Redis 锁，redisKey = {}, value = {}", redisKey, remainingCalls);
         if (b == null || !b) {
+            log.error("调用过于频繁，Redis 锁获取失败：redisKey = {}", redisKey);
             return handleInvokeTooFrequentlyError(response);
         }
-        log.info("redisKey:{}, value:{}", redisKey, remainingCalls);
+
+        log.info("Redis 锁成功获取，redisKey = {}, value = {}", redisKey, remainingCalls);
 
         // 处理请求响应
         return handleResponse(exchange, chain, interfaceInfo.getId(), invokeUser.getId());
     }
+
 
     /**
      * 处理响应
@@ -178,6 +210,8 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
                         if (body instanceof Flux) {
                             Flux<? extends DataBuffer> fluxBody = Flux.from(body);
                             return super.writeWith(
+                                    // TODO 接口调用成功，则增加调用次数，调用失败就通过消息回滚调用次数
+                                    // originalResponse.getStatusCode().equals(HttpStatus.OK)
                                     fluxBody.handle((dataBuffer, sink) -> {
                                         String redisKey = userId + ":invoke:" + interfaceInfoId; // 生成 Redis Key
                                         log.info(redisKey);
@@ -189,6 +223,7 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
                                         // 尝试更新数据库
                                         if (RemainingCalls != null && Integer.parseInt(RemainingCalls) > 0) {
                                             // 更新调用次数
+                                            // TODO 加入remainingCalls参数，增加调用次数的时候顺便检查数据库与缓存的一致性
                                             innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
                                             // 删除redis键值对
                                             redisTemplate.delete(redisKey);

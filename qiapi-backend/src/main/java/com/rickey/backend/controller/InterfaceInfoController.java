@@ -1,9 +1,5 @@
 package com.rickey.backend.controller;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,9 +11,9 @@ import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.rickey.backend.model.enums.InterfaceInfoStatusEnum;
 import com.rickey.backend.service.InterfaceInfoService;
+import com.rickey.backend.service.UserInterfaceInfoService;
 import com.rickey.backend.service.UserService;
 import com.rickey.backend.utils.RedisUtil;
-import com.rickey.clientSDK.client.QiApiClient;
 import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.DeleteRequest;
@@ -26,16 +22,19 @@ import com.rickey.common.common.IdRequest;
 import com.rickey.common.constant.CommonConstant;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.InterfaceInfo;
-import com.rickey.common.utils.CookieUtil;
+import com.rickey.common.model.entity.UserInterfaceInfo;
 import com.rickey.common.utils.ResultUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -43,6 +42,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/interfaceInfo")
+@RequiredArgsConstructor
 @Slf4j
 public class InterfaceInfoController {
 
@@ -58,20 +58,26 @@ public class InterfaceInfoController {
 
     private static final String GATEWAY_HOST = "http://localhost:8090";
 
-    @Resource
-    private InterfaceInfoService interfaceInfoService;
+    private final InterfaceInfoService interfaceInfoService;
 
-    @Resource
-    private UserService userService;
+    private final UserService userService;
 
-    @Resource
-    private QiApiClient qiApiClient;
+    private final RedisTemplate redisTemplate;
 
-    @Resource
-    private RedisTemplate redisTemplate;
+    private final RedisUtil redisUtil;
 
-    @Resource
-    private RedisUtil redisUtil;
+    private final UserInterfaceInfoService userInterfaceInfoService;
+
+    private static final Gson gson = new Gson();
+
+    @Autowired
+    public InterfaceInfoController(InterfaceInfoService interfaceInfoService, UserInterfaceInfoService userInterfaceInfoService, RedisUtil redisUtil, RedisTemplate redisTemplate, UserService userService) {
+        this.interfaceInfoService = interfaceInfoService;
+        this.userInterfaceInfoService = userInterfaceInfoService;
+        this.redisUtil = redisUtil;
+        this.redisTemplate = redisTemplate;
+        this.userService = userService;
+    }
 
     // region 增删改查
 
@@ -224,12 +230,10 @@ public class InterfaceInfoController {
      * 分页获取列表
      *
      * @param interfaceInfoQueryRequest
-     * @param request
      * @return
      */
     @GetMapping("/list/page")
-    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest,
-                                                                     HttpServletRequest request) {
+    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
         if (interfaceInfoQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -274,11 +278,8 @@ public class InterfaceInfoController {
         return ResultUtils.success(interfaceInfoPage);
     }
 
-
-    // endregion
-
     /**
-     * 发布
+     * 发布接口
      *
      * @param idRequest
      * @param request
@@ -288,27 +289,33 @@ public class InterfaceInfoController {
     @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
                                                      HttpServletRequest request) {
-        if (idRequest == null || idRequest.getId() <= 0) {
+        //1.判断接口是否存在
+        //2.判断接口是否可以调用
+        //3.修改接口的状态为发布状态
+        if (idRequest == null || idRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = idRequest.getId();
-        // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
-        if (oldInterfaceInfo == null) {
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 判断该接口是否可以调用
-        com.rickey.clientSDK.model.User user = new com.rickey.clientSDK.model.User();
-        user.setUsername("test");
-        String username = qiApiClient.getUsernameByPost(user);
-        if (StringUtils.isBlank(username)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+
+        String accessKey = request.getHeader("accessKey");
+        String secretKey = request.getHeader("secretKey");
+
+        Object res = invokeInterfaceInfo(interfaceInfo.getSdk(), interfaceInfo.getName(), interfaceInfo.getRequestParams(), accessKey, secretKey);
+        if (res == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 仅本人或管理员可修改
-        InterfaceInfo interfaceInfo = new InterfaceInfo();
-        interfaceInfo.setId(id);
-        interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
-        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        if (res.toString().contains("Error request")) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统接口内部异常");
+        }
+
+        InterfaceInfo updateInterfaceInfo = new InterfaceInfo();
+        updateInterfaceInfo.setId(id);
+        updateInterfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        boolean result = interfaceInfoService.updateById(updateInterfaceInfo);
         return ResultUtils.success(result);
     }
 
@@ -341,95 +348,89 @@ public class InterfaceInfoController {
     }
 
     /**
-     * POST方式获取用户名
-     *
+     *  在线调用接口
      * @param interfaceInfoInvokeRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/name/user")
-    @SentinelResource(value = "qi-api-interface",
-            blockHandler = "blockHandlerPOST", blockHandlerClass = SentinelConfig.class,
-            fallback = "fallbackPOST", fallbackClass = SentinelConfig.class)
-    public BaseResponse<Object> getUserNameByPost(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
-                                                  HttpServletRequest request) {
-        // 前端传过来的 id
-        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        long id = interfaceInfoInvokeRequest.getId();
-        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
-        // 判断是否存在
-        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
-        if (oldInterfaceInfo == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
-        }
-        Long userId = Long.valueOf(request.getHeader("userId"));
-        String accessKey = request.getHeader("accessKey");
-        String secretKey = request.getHeader("secretKey");
-
-        QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
-        Gson gson = new Gson();
-        com.rickey.clientSDK.model.User user = gson.fromJson(userRequestParams, com.rickey.clientSDK.model.User.class);
-        String usernameByPost = tempClient.getUsernameByPost(user);
-        return ResultUtils.success(usernameByPost);
-    }
-
-    /**
-     * 随机毒鸡汤接口
-     *
      * @param request
      * @return
      */
     @SentinelResource(value = "qi-api-interface",
             blockHandler = "blockHandlerGET", blockHandlerClass = SentinelConfig.class,
             fallback = "fallbackGET", fallbackClass = SentinelConfig.class)
-    @GetMapping("/random/encouragement")
-    public BaseResponse<Object> getRandomEncouragement(HttpServletRequest request) {
-        String accessKey = request.getHeader("accessKey");
-        System.out.println("accessKey = " + accessKey);
-        String secretKey = request.getHeader("secretKey");
-        System.out.println("secretKey = " + secretKey);
-        String cookieValue = CookieUtil.getCookieValue(request, COOKIE_NAME);
-        if (StrUtil.isNotBlank(cookieValue)) {
-            // 如果获取到 Token，则调用延长过期时间的方法
-            String gatewayResponse = extendSessionExpireTime(cookieValue);
-            System.out.println("延长会话结果: " + gatewayResponse);
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) {
+        // 1.判断接口是否存在
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 得到了token，准备调用延长过期时间的方法
-        QiApiClient tempClient = new QiApiClient(accessKey, secretKey);
-        String randomEncouragement = tempClient.getRandomEncouragement();
-        System.out.println("randomEncouragement = " + randomEncouragement);
-        System.out.println("接口调用转发");
-        return ResultUtils.success(randomEncouragement);
+        long id = interfaceInfoInvokeRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        log.info("调用的接口id = {}", id);
+        if (interfaceInfo == null) {
+            log.error("请求参数为空，无法处理接口调用，接口信息：{}", interfaceInfoInvokeRequest);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        String accessKey = request.getHeader("accessKey");
+        String secretKey = request.getHeader("secretKey");
+        String userId = request.getHeader("userId");
+
+        // 2.用户调用次数校验
+        QueryWrapper<UserInterfaceInfo> userInterfaceInfoQueryWrapper = new QueryWrapper<>();
+        userInterfaceInfoQueryWrapper.eq("userId", userId);
+        userInterfaceInfoQueryWrapper.eq("interfaceInfoId", id);
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getOne(userInterfaceInfoQueryWrapper);
+        if (userInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "调用次数不足！");
+        }
+        int leftNum = userInterfaceInfo.getLeftNum();
+        if (leftNum <= 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "调用次数不足！");
+        }
+        // 3.发起接口调用
+        String requestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        log.info("sdk = {}", interfaceInfo.getSdk());
+        log.info("name = {}", interfaceInfo.getName());
+        log.info("requestParams = {}", requestParams);
+        Object res = invokeInterfaceInfo(interfaceInfo.getSdk(), interfaceInfo.getName(), requestParams, accessKey, secretKey);
+        if (res == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (res.toString().contains("Error request")) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "调用错误，请检查参数和接口调用次数！");
+        }
+        return ResultUtils.success(res);
     }
 
-    /**
-     * 向网关发送请求延长 Session 过期时间
-     *
-     * @param token 用户的 Session Token
-     * @return 返回网关的响应内容
-     */
-    public String extendSessionExpireTime(String token) {
+    private Object invokeInterfaceInfo(String classPath, String methodName, String userRequestParams,
+                                       String accessKey, String secretKey) {
         try {
-            // 使用 HttpRequest 构造 GET 请求
-            HttpResponse httpResponse = HttpRequest.get(GATEWAY_HOST + "/api/interfaceInvoke/extend")
-                    .cookie(COOKIE_NAME + "=" + token)
-                    .execute();
+            Class<?> clientClazz = Class.forName(classPath);
+            // 1. 获取构造器，参数为ak,sk
+            Constructor<?> binApiClientConstructor = clientClazz.getConstructor(String.class, String.class);
+            // 2. 构造出客户端
+            Object apiClient = binApiClientConstructor.newInstance(accessKey, secretKey);
 
-            // 处理响应
-            if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
-                System.out.println("Session 延长成功，状态码：" + httpResponse.getStatus());
-            } else {
-                System.out.println("Session 延长失败，状态码：" + httpResponse.getStatus());
+            // 3. 找到要调用的方法
+            Method[] methods = clientClazz.getMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(methodName)) {
+                    // 3.1 获取参数类型列表
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == 0) {
+                        // 如果没有参数，直接调用
+                        return method.invoke(apiClient);
+                    }
+                    // 构造参数
+                    Object parameter = gson.fromJson(userRequestParams, parameterTypes[0]);
+                    log.info("parameter = {}", parameter);
+                    return method.invoke(apiClient, parameter);
+                }
             }
-            return httpResponse.body(); // 返回网关的响应内容
+            return null;
         } catch (Exception e) {
-            System.err.println("调用网关接口延长 Session 时间失败：" + e.getMessage());
-            return "Error: " + e.getMessage();
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "找不到调用的方法!! 请检查你的请求参数是否正确!");
         }
     }
 

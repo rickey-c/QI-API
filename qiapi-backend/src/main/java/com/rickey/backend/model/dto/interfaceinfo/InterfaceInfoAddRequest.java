@@ -47,6 +47,11 @@ public class InterfaceInfoAddRequest implements Serializable {
     private String method;
 
     /**
+     * 接口sdk
+     */
+    private String sdk;
+
+    /**
      * 每次调用的费用
      */
     private BigDecimal costPerCall;

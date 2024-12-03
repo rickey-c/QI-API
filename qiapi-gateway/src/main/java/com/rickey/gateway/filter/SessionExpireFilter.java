@@ -1,4 +1,4 @@
-package com.rickey.gateway.qiapigateway;
+package com.rickey.gateway.filter;
 
 import cn.hutool.core.text.AntPathMatcher;
 import cn.hutool.core.util.StrUtil;

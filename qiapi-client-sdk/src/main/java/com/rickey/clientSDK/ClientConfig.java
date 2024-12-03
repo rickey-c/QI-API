@@ -1,7 +1,7 @@
 package com.rickey.clientSDK;
 
-import com.rickey.clientSDK.client.PayClient;
-import com.rickey.clientSDK.client.QiApiClient;
+import com.rickey.clientSDK.client.NameApiClient;
+import com.rickey.clientSDK.client.RandomApiClient;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,13 +22,13 @@ public class ClientConfig {
     private String secretKey;
 
     @Bean
-    public QiApiClient qiApiClient() {
-        return new QiApiClient(accessKey, secretKey);
+    public NameApiClient nameApiClient() {
+        return new NameApiClient(accessKey, secretKey);
     }
 
     @Bean
-    public PayClient payClient() {
-        return new PayClient(accessKey, secretKey);
+    public RandomApiClient randomApiClient() {
+        return new RandomApiClient(accessKey, secretKey);
     }
 
 }

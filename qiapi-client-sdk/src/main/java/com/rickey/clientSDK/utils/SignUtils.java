@@ -15,20 +15,11 @@ public class SignUtils {
      * @return
      */
     public static String genSign(String body, String secretKey) {
+        if (body == null) {
+            body = "";
+        }
         Digester md5 = new Digester(DigestAlgorithm.SHA256);
         String content = body + "." + secretKey;
-        return md5.digestHex(content);
-    }
-
-    /**
-     * 生成签名
-     *
-     * @param secretKey
-     * @return
-     */
-    public static String genSign(String secretKey) {
-        Digester md5 = new Digester(DigestAlgorithm.SHA256);
-        String content = "." + secretKey;
         return md5.digestHex(content);
     }
 }

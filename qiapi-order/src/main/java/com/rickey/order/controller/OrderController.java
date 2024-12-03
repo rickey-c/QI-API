@@ -3,7 +3,6 @@ package com.rickey.order.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rickey.clientSDK.client.PayClient;
 import com.rickey.common.annotation.AuthCheck;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.DeleteRequest;
@@ -23,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,17 +38,12 @@ public class OrderController {
 
     static final String BASE_URL = "http://localhost:8123/api";
 
-    @Resource
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    @Resource
-    private RedisTemplate redisTemplate;
+    private final RedisTemplate redisTemplate;
 
-    @Resource
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Resource
-    private PayClient payClient;
 
     @DubboReference
     private InnerInterfaceInfoService interfaceInfoService;
@@ -57,6 +51,13 @@ public class OrderController {
     private static final String CACHE_KEY_PREFIX_ORDER = "order:";
 
     private static final String CACHE_KEY_PREFIX_ORDER_PAGE = "orderPage:";
+
+    @Autowired
+    public OrderController(OrderService orderService, RedisTemplate redisTemplate, RedisUtil redisUtil) {
+        this.orderService = orderService;
+        this.redisTemplate = redisTemplate;
+        this.redisUtil = redisUtil;
+    }
 
 
     /**

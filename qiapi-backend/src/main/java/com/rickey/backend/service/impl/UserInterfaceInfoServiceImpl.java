@@ -10,6 +10,7 @@ import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -41,6 +42,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     }
 
     @Override
+    @Transactional
     public boolean invokeCount(long interfaceInfoId, long userId) {
         // 判断
         if (interfaceInfoId <= 0 || userId <= 0) {

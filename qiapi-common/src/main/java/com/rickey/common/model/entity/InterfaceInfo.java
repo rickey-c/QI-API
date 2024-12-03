@@ -73,6 +73,11 @@ public class InterfaceInfo implements Serializable {
     private BigDecimal costPerCall;
 
     /**
+     * 接口sdk
+     */
+    private String sdk;
+
+    /**
      * 创建时间
      */
     private Date createTime;
