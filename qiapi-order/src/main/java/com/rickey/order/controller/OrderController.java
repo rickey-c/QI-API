@@ -44,7 +44,6 @@ public class OrderController {
 
     private final RedisUtil redisUtil;
 
-
     @DubboReference
     private InnerInterfaceInfoService interfaceInfoService;
 

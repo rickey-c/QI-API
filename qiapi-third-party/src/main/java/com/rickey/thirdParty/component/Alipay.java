@@ -8,9 +8,8 @@ import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.rickey.thirdParty.config.AliPayConfig;
 import com.rickey.thirdParty.model.entity.AliPayInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @Auther: Rickey
@@ -21,8 +20,12 @@ import javax.annotation.Resource;
 @Slf4j
 public class Alipay {
 
-    @Resource
-    private AliPayConfig alipayConfig;
+    private final AliPayConfig alipayConfig;
+
+    @Autowired
+    public Alipay(AliPayConfig alipayConfig) {
+        this.alipayConfig = alipayConfig;
+    }
 
     /**
      * 支付接口

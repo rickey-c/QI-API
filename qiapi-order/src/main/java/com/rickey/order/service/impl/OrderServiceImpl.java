@@ -7,9 +7,9 @@ import com.rickey.common.model.entity.Order;
 import com.rickey.order.mapper.OrderMapper;
 import com.rickey.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 
 @Slf4j
@@ -17,8 +17,12 @@ import java.math.BigDecimal;
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order>
         implements OrderService {
 
-    @Resource
-    private OrderMapper orderMapper;
+    private final OrderMapper orderMapper;
+
+    @Autowired
+    public OrderServiceImpl(OrderMapper orderMapper) {
+        this.orderMapper = orderMapper;
+    }
 
     /**
      * @param order

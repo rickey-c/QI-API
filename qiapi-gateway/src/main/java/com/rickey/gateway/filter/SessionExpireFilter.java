@@ -9,6 +9,7 @@ import com.rickey.common.model.entity.User;
 import com.rickey.gateway.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
 import javax.servlet.annotation.WebFilter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -39,10 +39,14 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class SessionExpireFilter implements GlobalFilter, Ordered {
 
-    @Resource
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     private final static String COOKIE_NAME = "rickey_login_token";
+
+    @Autowired
+    public SessionExpireFilter(RedisUtil redisUtil) {
+        this.redisUtil = redisUtil;
+    }
 
     /**
      * Process the Web request and (optionally) delegate to the next {@code WebFilter}

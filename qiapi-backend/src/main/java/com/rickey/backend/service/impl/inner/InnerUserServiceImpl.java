@@ -9,8 +9,7 @@ import com.rickey.common.model.entity.User;
 import com.rickey.common.service.InnerUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
-
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 内部用户服务实现类
@@ -18,10 +17,10 @@ import javax.annotation.Resource;
 @DubboService
 public class InnerUserServiceImpl implements InnerUserService {
 
-    @Resource
+    @Autowired
     private UserMapper userMapper;
 
-    @Resource
+    @Autowired
     private UserService userService;
 
     @Override

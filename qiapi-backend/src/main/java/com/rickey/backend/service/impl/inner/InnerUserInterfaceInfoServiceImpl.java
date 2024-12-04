@@ -3,20 +3,17 @@ package com.rickey.backend.service.impl.inner;
 import com.rickey.backend.service.UserInterfaceInfoService;
 import com.rickey.common.model.entity.UserInterfaceInfo;
 import com.rickey.common.service.InnerUserInterfaceInfoService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 内部用户接口信息服务实现类
  */
 @DubboService
+@Slf4j
 public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfoService {
-
-    private static final Logger log = LoggerFactory.getLogger(InnerUserInterfaceInfoServiceImpl.class);
-    @Resource
+    @Autowired
     private UserInterfaceInfoService userInterfaceInfoService;
 
     @Override

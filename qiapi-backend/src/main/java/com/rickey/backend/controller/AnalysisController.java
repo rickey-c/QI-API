@@ -14,6 +14,7 @@ import com.rickey.common.model.entity.UserInterfaceInfo;
 import com.rickey.common.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +40,7 @@ public class AnalysisController {
 
     private final InterfaceInfoService interfaceInfoService;
 
+    @Autowired
     public AnalysisController(UserInterfaceInfoMapper userInterfaceInfoMapper, InterfaceInfoService interfaceInfoService, InterfaceStatisticsTask interfaceStatisticsTask) {
         this.userInterfaceInfoMapper = userInterfaceInfoMapper;
         this.interfaceInfoService = interfaceInfoService;

@@ -4,9 +4,8 @@ import com.alipay.api.AlipayApiException;
 import com.rickey.thirdParty.component.Alipay;
 import com.rickey.thirdParty.model.entity.AliPayInfo;
 import com.rickey.thirdParty.service.AliPayService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Auther: csp1999
@@ -16,8 +15,12 @@ import javax.annotation.Resource;
 @Service
 public class AliPayServiceImpl implements AliPayService {
 
-    @Resource
-    private Alipay alipay;
+    private final Alipay alipay;
+
+    @Autowired
+    public AliPayServiceImpl(Alipay alipay) {
+        this.alipay = alipay;
+    }
 
     @Override
     public String aliPay(AliPayInfo aliPayInfo) throws AlipayApiException {

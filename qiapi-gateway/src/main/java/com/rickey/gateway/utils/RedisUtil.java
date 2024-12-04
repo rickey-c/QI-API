@@ -4,14 +4,16 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class RedisUtil {
 
-    @Resource
-    public RedisTemplate redisTemplate;
+    public final RedisTemplate redisTemplate;
+
+    public RedisUtil(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 删除缓存

@@ -9,10 +9,9 @@ import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 
 /**
  * 用户接口信息服务实现类
@@ -22,8 +21,12 @@ import javax.annotation.Resource;
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
         implements UserInterfaceInfoService {
 
-    @Resource
-    private UserInterfaceInfoMapper userInterfaceInfoMapper;
+    private final UserInterfaceInfoMapper userInterfaceInfoMapper;
+
+    @Autowired
+    public UserInterfaceInfoServiceImpl(UserInterfaceInfoMapper userInterfaceInfoMapper) {
+        this.userInterfaceInfoMapper = userInterfaceInfoMapper;
+    }
 
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {

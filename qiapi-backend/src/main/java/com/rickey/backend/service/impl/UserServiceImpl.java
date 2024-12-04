@@ -14,10 +14,10 @@ import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -29,16 +29,20 @@ import javax.servlet.http.HttpServletRequest;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
 
-    @Resource
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-    @Resource
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     /**
      * 盐值，混淆密码
      */
     private static final String SALT = "rickey";
+
+    @Autowired
+    public UserServiceImpl(UserMapper userMapper, RedisUtil redisUtil) {
+        this.userMapper = userMapper;
+        this.redisUtil = redisUtil;
+    }
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {

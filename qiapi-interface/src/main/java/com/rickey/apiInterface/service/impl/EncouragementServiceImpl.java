@@ -5,9 +5,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rickey.apiInterface.mapper.EncouragementMapper;
 import com.rickey.apiInterface.model.entity.Encouragement;
 import com.rickey.apiInterface.service.EncouragementService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @author RicKey
@@ -18,8 +17,12 @@ import javax.annotation.Resource;
 public class EncouragementServiceImpl extends ServiceImpl<EncouragementMapper, Encouragement>
         implements EncouragementService {
 
-    @Resource
-    private EncouragementMapper encouragementMapper;
+    private final EncouragementMapper encouragementMapper;
+
+    @Autowired
+    public EncouragementServiceImpl(EncouragementMapper encouragementMapper) {
+        this.encouragementMapper = encouragementMapper;
+    }
 
 
     /**

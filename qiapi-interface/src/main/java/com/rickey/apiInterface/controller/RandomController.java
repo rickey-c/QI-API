@@ -6,11 +6,10 @@ import com.rickey.apiInterface.sentinel.BlockHandlerService;
 import com.rickey.apiInterface.sentinel.FallbackService;
 import com.rickey.apiInterface.service.EncouragementService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * 随机 API
@@ -20,8 +19,12 @@ import javax.annotation.Resource;
 @Slf4j
 public class RandomController {
 
-    @Resource
-    private EncouragementService encouragementService;
+    private final EncouragementService encouragementService;
+
+    @Autowired
+    public RandomController(EncouragementService encouragementService) {
+        this.encouragementService = encouragementService;
+    }
 
     @GetMapping("/encouragement")
     @SentinelResource(value = "RandomController",

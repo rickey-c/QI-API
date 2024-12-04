@@ -8,8 +8,7 @@ import com.rickey.common.model.entity.InterfaceInfo;
 import com.rickey.common.service.InnerInterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
-
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 内部接口服务实现类
@@ -17,7 +16,7 @@ import javax.annotation.Resource;
 @DubboService
 public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService {
 
-    @Resource
+    @Autowired
     private InterfaceInfoMapper interfaceInfoMapper;
 
 

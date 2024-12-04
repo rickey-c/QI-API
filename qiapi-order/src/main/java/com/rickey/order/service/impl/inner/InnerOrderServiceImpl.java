@@ -4,8 +4,7 @@ import com.rickey.common.model.entity.Order;
 import com.rickey.common.service.InnerOrderService;
 import com.rickey.order.service.OrderService;
 import org.apache.dubbo.config.annotation.DubboService;
-
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @Author: Rickey
@@ -15,7 +14,7 @@ import javax.annotation.Resource;
 @DubboService
 public class InnerOrderServiceImpl implements InnerOrderService {
 
-    @Resource
+    @Autowired
     private OrderService orderService;
 
     /**

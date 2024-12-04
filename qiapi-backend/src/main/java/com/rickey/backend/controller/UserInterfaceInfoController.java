@@ -19,9 +19,9 @@ import com.rickey.common.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -33,11 +33,15 @@ import java.util.List;
 @Slf4j
 public class UserInterfaceInfoController {
 
-    @Resource
-    private UserInterfaceInfoService userInterfaceInfoService;
+    private final UserInterfaceInfoService userInterfaceInfoService;
 
-    @Resource
-    private UserService userService;
+    private final UserService userService;
+
+    @Autowired
+    public UserInterfaceInfoController(UserService userService, UserInterfaceInfoService userInterfaceInfoService) {
+        this.userService = userService;
+        this.userInterfaceInfoService = userInterfaceInfoService;
+    }
 
     // region 增删改查
 

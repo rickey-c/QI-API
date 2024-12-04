@@ -22,11 +22,11 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -44,11 +44,13 @@ import java.util.concurrent.Executors;
 @RequestMapping("/alipay")
 @Slf4j
 public class PayController {
-    @Resource
-    private AliPayConfig alipayConfig;
+    private final AliPayConfig alipayConfig;
 
-    @Resource
-    private AliPayService aliPayService;
+    private final AliPayService aliPayService;
+
+    private final RocketMQTemplate rocketMQTemplate;
+
+    private final AliPayConfig aliPayConfig;
 
     @DubboReference
     private InnerOrderService innerOrderService;
@@ -56,15 +58,17 @@ public class PayController {
     @DubboReference
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
-
-    @Resource
-    private AliPayConfig aliPayConfig;
-
     private ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     private final String DEAD_LETTER_TOPIC = "%DLQ%order-topic:sendUpdateMessage";
+
+    @Autowired
+    public PayController(AliPayConfig aliPayConfig, AliPayConfig alipayConfig, AliPayService aliPayService, RocketMQTemplate rocketMQTemplate) {
+        this.aliPayConfig = aliPayConfig;
+        this.alipayConfig = alipayConfig;
+        this.aliPayService = aliPayService;
+        this.rocketMQTemplate = rocketMQTemplate;
+    }
 
     /**
      * 支付宝支付 api
