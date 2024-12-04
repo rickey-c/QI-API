@@ -65,8 +65,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         // 跳过特定路径
         AntPathMatcher pathMatcher = new AntPathMatcher();
         // 使用 Stream 判断是否匹配任何路径
-        if (skipPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, webPath)) &&
-                !pathMatcher.match("/api/interfaceInvoke/extend", webPath)) {
+        if (skipPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, webPath))) {
             log.info("SessionExpireFilter Skip成功: {}", webPath);
             return chain.filter(exchange);
         }
@@ -148,7 +147,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1; // 指定过滤器的执行顺序
+        return 1; // 指定过滤器的执行顺序
     }
 
 }

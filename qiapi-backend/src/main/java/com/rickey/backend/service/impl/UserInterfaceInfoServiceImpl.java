@@ -135,7 +135,6 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         return userInterfaceInfo;
     }
 
-
 }
 
 

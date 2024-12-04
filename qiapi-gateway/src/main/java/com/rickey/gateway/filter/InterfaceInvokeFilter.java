@@ -7,6 +7,7 @@ import com.rickey.common.model.entity.User;
 import com.rickey.common.service.InnerInterfaceInfoService;
 import com.rickey.common.service.InnerUserInterfaceInfoService;
 import com.rickey.common.service.InnerUserService;
+import com.rickey.gateway.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
@@ -17,7 +18,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,7 +30,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 全局过滤器，用于处理请求和响应的日志、鉴权、限流等功能
@@ -39,8 +38,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 @CrossOrigin(origins = "*")
 public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
-
-    private final RedisTemplate redisTemplate;
 
     @DubboReference
     private InnerUserService innerUserService; // 用户服务接口
@@ -51,15 +48,14 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
     @DubboReference
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService; // 用户接口信息服务接口
 
+    private final RedisUtil redisUtil;
+
     private static final String INTERFACE_HOST = "http://localhost:8123"; // 接口的主机地址
 
-    User invokeUser = null;
-
-    InterfaceInfo interfaceInfo = null;
 
     @Autowired
-    public InterfaceInvokeFilter(RedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public InterfaceInvokeFilter(RedisUtil redisUtil) {
+        this.redisUtil = redisUtil;
     }
 
     @Override
@@ -98,6 +94,8 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
         log.info("接收到请求的头部信息：accessKey = {}, nonce = {}, timestamp = {}, sign = {}, body = {}",
                 accessKey, nonce, timestamp, sign, body);
+
+        User invokeUser = null;
 
         // 从数据库中查找用户
         try {
@@ -148,6 +146,8 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
             return handleNoAuth(response);
         }
 
+        InterfaceInfo interfaceInfo = null;
+
         // 4. 检查请求的接口是否存在，以及请求方法是否匹配
         try {
             interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(path, method);
@@ -172,9 +172,11 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
         // 6.利用Redis做分布式锁，同一用户在同一时间只能调用一个接口
         String redisKey = invokeUser.getId() + ":invoke:" + interfaceInfo.getId(); // 生成 Redis Key
-        Boolean b = redisTemplate.opsForValue().setIfAbsent(redisKey, String.valueOf(remainingCalls), 10, TimeUnit.SECONDS);
+
+        // Boolean b = redisTemplate.opsForValue().setIfAbsent(redisKey, String.valueOf(remainingCalls), 10, TimeUnit.SECONDS);
+        boolean setNXSuccess = redisUtil.setNX(redisKey, String.valueOf(remainingCalls), 5);
         log.info("尝试获取 Redis 锁，redisKey = {}, value = {}", redisKey, remainingCalls);
-        if (b == null || !b) {
+        if (!setNXSuccess) {
             log.error("调用过于频繁，Redis 锁获取失败：redisKey = {}", redisKey);
             return handleInvokeTooFrequentlyError(response);
         }
@@ -210,40 +212,37 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
                         if (body instanceof Flux) {
                             Flux<? extends DataBuffer> fluxBody = Flux.from(body);
                             return super.writeWith(
-                                    // TODO 接口调用成功，则增加调用次数，调用失败就通过消息回滚调用次数
-                                    // originalResponse.getStatusCode().equals(HttpStatus.OK)
                                     fluxBody.handle((dataBuffer, sink) -> {
-                                        String redisKey = userId + ":invoke:" + interfaceInfoId; // 生成 Redis Key
-                                        log.info(redisKey);
+                                        try {
+                                            String redisKey = userId + ":invoke:" + interfaceInfoId;
+                                            log.info(redisKey);
 
-                                        // 获取当前剩余调用次数
-                                        String RemainingCalls = (String) redisTemplate.opsForValue().get(redisKey);
-                                        log.info(RemainingCalls);
+                                            // 异步更新调用次数
+                                            boolean invokeCountSuccess = innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
+                                            log.info("更新调用次数，结果 = {}", invokeCountSuccess);
 
-                                        // 尝试更新数据库
-                                        if (RemainingCalls != null && Integer.parseInt(RemainingCalls) > 0) {
-                                            // 更新调用次数
-                                            // TODO 加入remainingCalls参数，增加调用次数的时候顺便检查数据库与缓存的一致性
-                                            innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
                                             // 删除redis键值对
-                                            redisTemplate.delete(redisKey);
-                                            log.info("调用次数更新成功");
-                                        } else {
-                                            log.error("用户 {} 调用接口 {} 时，调用次数已用尽，无法进行调用",
-                                                    invokeUser.getUserName(), interfaceInfo.getName());
-                                            sink.error(new RuntimeException("调用次数已用尽，无法进行调用"));
-                                            return; // 直接返回
+                                            boolean delRedisKeySuccess = redisUtil.del(redisKey);
+                                            log.info("删除redisKey,结果 = {}", delRedisKeySuccess);
+
+                                            // 读取响应内容
+                                            byte[] content = new byte[dataBuffer.readableByteCount()];
+                                            dataBuffer.read(content);
+                                            DataBufferUtils.release(dataBuffer);
+
+                                            // 构建日志
+                                            String data = new String(content, StandardCharsets.UTF_8);
+                                            log.info("响应结果：{}", data);
+
+                                            // 继续处理响应
+                                            sink.next(bufferFactory.wrap(content));
+                                        } catch (Exception e) {
+                                            log.error("处理响应时发生错误", e);
+                                            // 处理异常，确保后续流程不受影响
+                                            sink.error(e);
                                         }
-
-                                        byte[] content = new byte[dataBuffer.readableByteCount()];
-                                        dataBuffer.read(content);
-                                        DataBufferUtils.release(dataBuffer);
-
-                                        // 构建日志
-                                        String data = new String(content, StandardCharsets.UTF_8);
-                                        log.info("响应结果：{}", data);
-                                        sink.next(bufferFactory.wrap(content));
-                                    }));
+                                    })
+                            );
                         } else {
                             log.error("<--- {} 响应code异常", statusCode);
                         }
@@ -259,11 +258,6 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
             log.error("网关处理响应异常", e);
             return chain.filter(exchange); // 返回原始响应
         }
-    }
-
-    @Override
-    public int getOrder() {
-        return -1; // 指定过滤器的执行顺序
     }
 
     // 处理未授权的请求
@@ -289,5 +283,10 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         DataBuffer buffer = response.bufferFactory().wrap(message.getBytes(StandardCharsets.UTF_8)); // 包装错误信息
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8"); // 设置响应头
         return response.writeWith(Mono.just(buffer)); // 返回错误信息
+    }
+
+    @Override
+    public int getOrder() {
+        return 2; // 指定过滤器的执行顺序
     }
 }

@@ -91,4 +91,19 @@ public class RedisUtil {
             return false;
         }
     }
+
+    public boolean setNX(String key, Object value, long time) {
+        //Boolean b = redisTemplate.opsForValue().setIfAbsent(redisKey, String.valueOf(remainingCalls), 10, TimeUnit.SECONDS);
+        try {
+            if (time > 0) {
+                redisTemplate.opsForValue().setIfAbsent(key, value, time, TimeUnit.SECONDS);
+            } else {
+                redisTemplate.opsForValue().setIfAbsent(key, value);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

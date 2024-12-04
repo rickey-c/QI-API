@@ -7,20 +7,21 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 @Slf4j
 @Component
 @RocketMQMessageListener(topic = "order-topic", consumerGroup = "order-consumer-group")
 public class OrderPaymentConsumer implements RocketMQListener<String> {
 
-    @Resource
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
+    private final RocketMQTemplate rocketMQTemplate;
 
     private final String DEAD_LETTER_TOPIC = "%DLQ%order-topic:consumeUpdateMessage";
+
+    public OrderPaymentConsumer(OrderService orderService, RocketMQTemplate rocketMQTemplate) {
+        this.orderService = orderService;
+        this.rocketMQTemplate = rocketMQTemplate;
+    }
 
     /**
      * @param message

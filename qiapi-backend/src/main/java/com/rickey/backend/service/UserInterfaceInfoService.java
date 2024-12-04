@@ -26,4 +26,5 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
     boolean updateLeftNum(long interfaceInfoId, long userId, int calls, int increment);
 
     UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId);
+
 }
