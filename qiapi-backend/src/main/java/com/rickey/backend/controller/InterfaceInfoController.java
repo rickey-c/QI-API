@@ -1,10 +1,8 @@
 package com.rickey.backend.controller;
 
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.rickey.backend.config.SentinelConfig;
 import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.rickey.backend.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
@@ -353,9 +351,6 @@ public class InterfaceInfoController {
      * @param request
      * @return
      */
-    @SentinelResource(value = "qi-api-interface",
-            blockHandler = "blockHandlerGET", blockHandlerClass = SentinelConfig.class,
-            fallback = "fallbackGET", fallbackClass = SentinelConfig.class)
     @PostMapping("/invoke")
     public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
                                                     HttpServletRequest request) {

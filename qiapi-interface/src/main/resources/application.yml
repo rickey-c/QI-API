@@ -12,3 +12,15 @@ spring:
     url: jdbc:mysql://localhost:3306/qiapi
     username: root
     password: 123456
+  cloud:
+    sentinel:
+      enabled: true
+      eager: true
+      transport:
+        dashboard: localhost:8880
+        port: 8723
+        clientIp: localhost
+      filter:
+        url-patterns: /**
+      web-context-unify: false
+

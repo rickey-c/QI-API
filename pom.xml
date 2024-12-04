@@ -135,6 +135,12 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
             <version>2021.0.6.0</version>
         </dependency>
+        <!--sentinel控制台依赖-->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-transport-simple-http</artifactId>
+            <version>1.8.8</version>
+        </dependency>
         <!--aspectj依赖，添加了降级熔断策略-->
         <dependency>
             <groupId>com.alibaba.csp</groupId>

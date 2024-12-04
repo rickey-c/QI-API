@@ -21,12 +21,6 @@ spring:
     database: 0
   cache:
     type: redis
-  cloud:
-    sentinel:
-      transport:
-        dashboard: localhost:8880
-        port: 8723
-        clientIp: localhost
 server:
   port: 7529
   servlet:
@@ -47,7 +41,7 @@ dubbo:
     address: nacos://localhost:8848
   protocol:
     name: dubbo
-    port: 20880
+    port: 20884
 # MyBatis配置
 mybatis:
   # 搜索指定包别名

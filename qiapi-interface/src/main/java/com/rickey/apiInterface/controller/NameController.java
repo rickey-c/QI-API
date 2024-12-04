@@ -1,11 +1,13 @@
 package com.rickey.apiInterface.controller;
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.rickey.apiInterface.config.SentinelConfig;
+import com.rickey.apiInterface.sentinel.BlockHandlerService;
+import com.rickey.apiInterface.sentinel.FallbackService;
 import com.rickey.clientSDK.model.User;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 名称 API
@@ -16,11 +18,10 @@ public class NameController {
 
 
     @PostMapping("/user")
-    @SentinelResource(value = "qi-api-interface",
-            blockHandler = "blockHandlerPOST", blockHandlerClass = SentinelConfig.class,
-            fallback = "fallbackPOST", fallbackClass = SentinelConfig.class)
-    public String getUsernameByPost(@RequestBody User user, HttpServletRequest request) {
-        String result = "POST 用户名字是" + user.getUsername();
-        return result;
+    @SentinelResource(value = "NameController",
+            blockHandler = "NameControllerBlockHandler", blockHandlerClass = BlockHandlerService.class,
+            fallback = "NameControllerFallback", fallbackClass = FallbackService.class)
+    public String getUsernameByPost(@RequestBody User user) {
+        return "POST 用户名字是" + user.getUsername();
     }
 }

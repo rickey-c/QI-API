@@ -36,7 +36,7 @@ dubbo:
     address: nacos://localhost:8848
   protocol:
     name: dubbo
-    port: 20883
+    port: 20882
 
 rocketmq:
   name-server: 124.222.215.143:9876
