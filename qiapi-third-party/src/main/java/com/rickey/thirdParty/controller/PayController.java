@@ -23,6 +23,7 @@ import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -105,6 +106,7 @@ public class PayController {
      */
     @PostMapping("/callback")
     @ResponseBody
+    @Transactional
     public BaseResponse<String> callback(HttpServletRequest request) {
         Map<String, String> params = convertRequestParamsToMap(request); // 将异步通知中收到的待验证所有参数都存放到map中
         String paramsJson = JSON.toJSONString(params);
@@ -144,18 +146,25 @@ public class PayController {
                                         public void onSuccess(SendResult sendResult) {
                                             // 处理消息发送成功逻辑
                                             log.info("更新订单状态消息发送成功");
-                                            // TODO增加接口调用次数
                                             Order order = innerOrderService.getOrderById(Long.valueOf(orderId));
                                             Long userId = order.getUserId();
                                             Long interfaceId = order.getInterfaceId();
                                             Integer increment = order.getQuantity();
-                                            UserInterfaceInfo userInterfaceInfo = innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceId);
+                                            UserInterfaceInfo userInterfaceInfo =
+                                                    innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceId);
+                                            log.info("userId = {}", userId);
+                                            log.info("interfaceId = {}", interfaceId);
+                                            log.info("increment = {}", increment);
+                                            log.info("userInterfaceInfo = {}", userInterfaceInfo);
+                                            // 增加接口调用次数
                                             Integer leftNum = userInterfaceInfo.getLeftNum();
-                                            boolean updateLeftNum = innerUserInterfaceInfoService.updateLeftNum(interfaceId, userId, leftNum, increment);
+                                            boolean updateLeftNum =
+                                                    innerUserInterfaceInfoService.updateLeftNum(interfaceId, userId, leftNum, increment);
                                             if (!updateLeftNum) {
                                                 log.info("更新调用次数失败");
+                                            } else {
+                                                log.info("更新接口调用次数成功");
                                             }
-                                            log.debug("更新接口调用次数成功");
                                         }
 
                                         @Override
@@ -174,7 +183,7 @@ public class PayController {
                     }
                 });
                 // 如果签名验证正确，立即返回success，后续业务另起线程单独处理
-                // 业务处理失败，可查看日志进行补偿，跟支付宝已经没多大关系。
+                // 业务处理失败，可查看日志进行补偿
                 ResultUtils.success("success");
             } else {
                 log.info("支付宝回调签名认证失败，signVerified=false, paramsJson:{}", paramsJson);

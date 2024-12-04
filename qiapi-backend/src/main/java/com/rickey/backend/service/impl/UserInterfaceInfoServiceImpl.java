@@ -83,7 +83,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     /**
      * @param interfaceInfoId
      * @param userId
-     * @param calls
+     * @param leftNum
      * @param increment
      * @return
      */
@@ -94,7 +94,8 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             log.info("interfaceInfoId非法或者userId非法");
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        UserInterfaceInfo userInterfaceInfo = getUserInterfaceInfo(interfaceInfoId, userId);
+        UserInterfaceInfo userInterfaceInfo = getUserInterfaceInfo(userId, interfaceInfoId);
+        log.info("userInterfaceInfo = {}", userInterfaceInfo);
         if (userInterfaceInfo == null) {
             // 创建对应关系
             UserInterfaceInfo newUserInterfaceInfo = new UserInterfaceInfo();

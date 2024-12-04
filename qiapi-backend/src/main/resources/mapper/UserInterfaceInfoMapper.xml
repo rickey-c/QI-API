@@ -22,8 +22,9 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
+
     <update id="updateLeftNumByIncrement">
-        update userInterfaceInfo
+        update `user_interface_info`
         set leftNum = leftNum + #{increment}
         where id = #{id}
           and leftNum = #{leftNum}
@@ -31,7 +32,7 @@
 
     <select id="listTopInvokeInterfaceInfo" resultType="com.rickey.common.model.entity.UserInterfaceInfo">
         select interfaceInfoId, sum(totalNum) as totalNum
-        from user_interface_info
+        from `user_interface_info`
         group by interfaceInfoId
         order by totalNum desc limit #{limit};
     </select>
