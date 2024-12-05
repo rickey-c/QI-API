@@ -77,5 +77,10 @@
             <artifactId>spring-data-redis</artifactId>
             <version>3.2.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.eagle6688</groupId>
+            <artifactId>devutility.external.javax.validation</artifactId>
+            <version>1.0.4</version>
+        </dependency>
     </dependencies>
 </project>

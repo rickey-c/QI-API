@@ -66,8 +66,7 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
         // 只在路径为 /api/interfaceInvoke/** 时进行过滤
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        if (pathMatcher.match("/api/interfaceInvoke/extend", webPath) ||
-                !pathMatcher.match("/api/interfaceInvoke/**", webPath)) {
+        if (!pathMatcher.match("/api/interfaceInvoke/**", webPath)) {
             log.info("InterfaceInvokeFilter Skip成功, 当前路径不需要过滤");
             return chain.filter(exchange);
         }

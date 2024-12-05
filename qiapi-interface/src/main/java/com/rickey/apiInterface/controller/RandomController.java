@@ -1,7 +1,10 @@
 package com.rickey.apiInterface.controller;
 
 
+import cn.hutool.http.HttpRequest;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.rickey.apiInterface.model.dto.ImageResponse;
 import com.rickey.apiInterface.sentinel.BlockHandlerService;
 import com.rickey.apiInterface.sentinel.FallbackService;
 import com.rickey.apiInterface.service.EncouragementService;
@@ -34,5 +37,20 @@ public class RandomController {
         return "心灵鸡汤为: " + encouragementService.getRandomEncouragement().getMessage();
     }
 
+    @GetMapping("/image")
+    public String getRandomImageUrl() {
+        // 直接构造GET请求，传递必要的参数
+        String url = "https://www.dmoe.cc/random.php?return=json";
+
+        String body = HttpRequest.get(url)
+                .execute()
+                .body();
+
+        // 使用 JSONUtil 解析返回的 JSON 数据
+        ImageResponse imageResponse = JSONUtil.toBean(body, ImageResponse.class);
+
+        // 返回图片 URL
+        return imageResponse.getImgurl();
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.rickey.clientSDK;
 
+import com.rickey.clientSDK.client.DayApiClient;
+import com.rickey.clientSDK.client.IpApiClient;
 import com.rickey.clientSDK.client.NameApiClient;
 import com.rickey.clientSDK.client.RandomApiClient;
 import lombok.Data;
@@ -29,6 +31,16 @@ public class ClientConfig {
     @Bean
     public RandomApiClient randomApiClient() {
         return new RandomApiClient(accessKey, secretKey);
+    }
+
+    @Bean
+    public DayApiClient dayApiClient() {
+        return new DayApiClient(accessKey, secretKey);
+    }
+
+    @Bean
+    public IpApiClient ipApiClient() {
+        return new IpApiClient(accessKey, secretKey);
     }
 
 }
