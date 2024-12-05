@@ -45,7 +45,6 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     }
 
     @Override
-    @Transactional
     public boolean invokeCount(long interfaceInfoId, long userId) {
         // 判断
         if (interfaceInfoId <= 0 || userId <= 0) {
@@ -91,16 +90,19 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
      * @return
      */
     @Override
+    @Transactional
     public boolean updateLeftNum(long interfaceInfoId, long userId, int leftNum, int increment) {
-        log.debug("interfaceInfoId={}, userId={}", interfaceInfoId, userId);
+        log.info("updateLeftNum方法调用:interfaceInfoId={}, userId={}", interfaceInfoId, userId);
         if (interfaceInfoId == 0 || userId <= 0) {
             log.info("interfaceInfoId非法或者userId非法");
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        log.info("updateLeftNum方法调用...");
         UserInterfaceInfo userInterfaceInfo = getUserInterfaceInfo(userId, interfaceInfoId);
         log.info("userInterfaceInfo = {}", userInterfaceInfo);
         if (userInterfaceInfo == null) {
             // 创建对应关系
+            log.info("找不到对应的信息，新建中...");
             UserInterfaceInfo newUserInterfaceInfo = new UserInterfaceInfo();
             newUserInterfaceInfo.setUserId(userId);
             newUserInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
@@ -117,6 +119,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             if (!updateLeftNumByIncrement) {
                 log.debug("接口调用次数更新失败");
             }
+            log.info("接口调用次数更新成功");
         }
         return true;
     }

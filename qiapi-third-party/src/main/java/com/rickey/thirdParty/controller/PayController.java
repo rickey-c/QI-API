@@ -151,23 +151,32 @@ public class PayController {
                                             // 处理消息发送成功逻辑
                                             log.info("更新订单状态消息发送成功");
                                             Order order = innerOrderService.getOrderById(Long.valueOf(orderId));
-                                            Long userId = order.getUserId();
-                                            Long interfaceId = order.getInterfaceId();
-                                            Integer increment = order.getQuantity();
+                                            long userId = order.getUserId();
+                                            long interfaceId = order.getInterfaceId();
+                                            int increment = order.getQuantity();
                                             UserInterfaceInfo userInterfaceInfo =
                                                     innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceId);
                                             log.info("userId = {}", userId);
                                             log.info("interfaceId = {}", interfaceId);
                                             log.info("increment = {}", increment);
-                                            log.info("userInterfaceInfo = {}", userInterfaceInfo);
-                                            // 增加接口调用次数
-                                            Integer leftNum = userInterfaceInfo.getLeftNum();
-                                            boolean updateLeftNum =
-                                                    innerUserInterfaceInfoService.updateLeftNum(interfaceId, userId, leftNum, increment);
-                                            if (!updateLeftNum) {
-                                                log.info("更新调用次数失败");
+                                            int leftNum = 0;
+                                            if (userInterfaceInfo == null) {
+                                                log.info("当前还没有对应的用户接口信息");
                                             } else {
-                                                log.info("更新接口调用次数成功");
+                                                log.info("查到对应的用户接口信息 = {}", userInterfaceInfo);
+                                                // 增加接口调用次数
+                                                leftNum = userInterfaceInfo.getLeftNum();
+                                            }
+                                            boolean updateLeftNum = false;
+                                            try {
+                                                updateLeftNum = innerUserInterfaceInfoService.updateLeftNum(interfaceId, userId, leftNum, increment);
+                                            } catch (Exception e) {
+                                                log.error("更新接口调用次数失败，异常信息：", e);
+                                            }
+                                            if (!updateLeftNum) {
+                                                log.error("更新调用次数失败，接口ID: {}, 用户ID: {}, 当前剩余次数: {}, 增量: {}", interfaceId, userId, leftNum, increment);
+                                            } else {
+                                                log.info("更新接口调用次数成功，接口ID: {}, 用户ID: {}, 新的剩余次数: {}", interfaceId, userId, leftNum + increment);
                                             }
                                         }
 

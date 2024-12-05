@@ -1,4 +1,4 @@
-package com.rickey.order.model.dto.order;
+package com.rickey.order.model.dto;
 
 import com.rickey.common.common.PageRequest;
 import lombok.Data;

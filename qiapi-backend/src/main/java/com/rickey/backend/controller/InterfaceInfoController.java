@@ -238,6 +238,8 @@ public class InterfaceInfoController {
 
         long current = interfaceInfoQueryRequest.getCurrent();
         long size = interfaceInfoQueryRequest.getPageSize();
+        log.info("currentPage = {}", current);
+        log.info("pageSize = {}", size);
         String sortField = interfaceInfoQueryRequest.getSortField();
         String sortOrder = interfaceInfoQueryRequest.getSortOrder();
         String description = interfaceInfoQueryRequest.getDescription();
@@ -269,6 +271,7 @@ public class InterfaceInfoController {
 
         // 从数据库获取数据
         interfaceInfoPage = interfaceInfoService.page(new Page<>(current, size), queryWrapper);
+        log.info("接口数据 = {}", interfaceInfoPage);
 
         // 将数据放入缓存
         redisUtil.set(cacheKey, interfaceInfoPage, 300);

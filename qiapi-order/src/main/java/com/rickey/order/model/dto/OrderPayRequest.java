@@ -1,4 +1,4 @@
-package com.rickey.order.model.dto.order;
+package com.rickey.order.model.dto;
 
 import java.math.BigDecimal;
 
