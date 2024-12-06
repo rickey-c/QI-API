@@ -34,7 +34,7 @@ import java.util.List;
  * 过滤器，重置redis中session有效期
  */
 @Component
-@WebFilter(urlPatterns = "/*", filterName = "sessionExporeFilter")
+@WebFilter(urlPatterns = "/*", filterName = "sessionExpireFilter")
 @Slf4j
 @CrossOrigin(origins = "*")
 public class SessionExpireFilter implements GlobalFilter, Ordered {
