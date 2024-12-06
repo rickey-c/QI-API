@@ -91,6 +91,7 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         String sign = headers.getFirst("sign"); // 获取签名
         String body = headers.getFirst("body"); // 获取请求体
 
+
         log.info("接收到请求的头部信息：accessKey = {}, nonce = {}, timestamp = {}, sign = {}, body = {}",
                 accessKey, nonce, timestamp, sign, body);
 
@@ -187,15 +188,6 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
     }
 
 
-    /**
-     * 处理响应
-     *
-     * @param exchange        服务器交换
-     * @param chain           过滤链
-     * @param interfaceInfoId 接口信息ID
-     * @param userId          用户ID
-     * @return Mono<Void>
-     */
     public Mono<Void> handleResponse(ServerWebExchange exchange, GatewayFilterChain chain, long interfaceInfoId, long userId) {
         try {
             ServerHttpResponse originalResponse = exchange.getResponse(); // 获取原始响应
@@ -204,47 +196,59 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
             // 只有在调用成功的时候才会进行调用次数的增加
             if (statusCode == HttpStatus.OK) {
+                log.info("响应成功，准备扣减接口调用次数");
+
                 // 装饰响应以增强功能
                 ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
                     @Override
                     public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+                        // 确保流数据只消费一次
                         if (body instanceof Flux) {
                             Flux<? extends DataBuffer> fluxBody = Flux.from(body);
+
                             return super.writeWith(
-                                    fluxBody.handle((dataBuffer, sink) -> {
-                                        try {
-                                            String redisKey = userId + ":invoke:" + interfaceInfoId;
-                                            log.info(redisKey);
+                                    fluxBody.buffer()  // 使用 buffer 来确保流数据被完整消费一次
+                                            .flatMap(dataBuffers -> {
+                                                // 合并所有的数据块
+                                                byte[] content = new byte[dataBuffers.stream().mapToInt(DataBuffer::readableByteCount).sum()];
+                                                int offset = 0;
 
-                                            // 异步更新调用次数
-                                            boolean invokeCountSuccess = innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
-                                            log.info("更新调用次数，结果 = {}", invokeCountSuccess);
+                                                // 将所有的 dataBuffer 合并为一个 byte[] 内容
+                                                for (DataBuffer dataBuffer : dataBuffers) {
+                                                    int length = dataBuffer.readableByteCount();
+                                                    dataBuffer.read(content, offset, length);
+                                                    offset += length;
 
-                                            // 删除redis键值对
-                                            boolean delRedisKeySuccess = redisUtil.del(redisKey);
-                                            log.info("删除redisKey,结果 = {}", delRedisKeySuccess);
+                                                    // 释放每个 dataBuffer
+                                                    DataBufferUtils.release(dataBuffer);
+                                                }
 
-                                            // 读取响应内容
-                                            byte[] content = new byte[dataBuffer.readableByteCount()];
-                                            dataBuffer.read(content);
-                                            DataBufferUtils.release(dataBuffer);
+                                                // 进行日志记录、调用次数更新等操作
+                                                String redisKey = userId + ":invoke:" + interfaceInfoId;
+                                                log.info("redisKey: {}", redisKey);
 
-                                            // 构建日志
-                                            String data = new String(content, StandardCharsets.UTF_8);
-                                            log.info("响应结果：{}", data);
+                                                // 删除 Redis 键值对
+                                                boolean delRedisKeySuccess = redisUtil.del(redisKey);
+                                                log.info("删除 redisKey, 结果 = {}", delRedisKeySuccess);
 
-                                            // 继续处理响应
-                                            sink.next(bufferFactory.wrap(content));
-                                        } catch (Exception e) {
-                                            log.error("处理响应时发生错误", e);
-                                            // 处理异常，确保后续流程不受影响
-                                            sink.error(e);
-                                        }
-                                    })
+                                                // 如果响应成功
+                                                if (statusCode == HttpStatus.OK) {
+                                                    // 更新调用次数
+                                                    boolean invokeCountSuccess = innerUserInterfaceInfoService.invokeCount(interfaceInfoId, userId);
+                                                    log.info("更新调用次数，结果 = {}", invokeCountSuccess);
+                                                } else {
+                                                    // 响应失败，设置错误响应
+                                                    String errorMessage = "{\"error\": \"参数填写错误，请检查参数\"}";
+                                                    content = errorMessage.getBytes(StandardCharsets.UTF_8);
+                                                }
+
+                                                // 返回修改后的响应体
+                                                return Mono.just(bufferFactory.wrap(content));
+                                            })
                             );
-                        } else {
-                            log.error("<--- {} 响应code异常", statusCode);
                         }
+
+                        // 如果不是 Flux 流，则直接调用原始的响应体处理
                         return super.writeWith(body);
                     }
                 };
@@ -252,6 +256,8 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
                 // 设置 response 对象为装饰过的
                 return chain.filter(exchange.mutate().response(decoratedResponse).build());
             }
+
+            // 如果响应状态不是 OK，直接返回原始响应
             return chain.filter(exchange); // 降级处理返回数据
         } catch (Exception e) {
             log.error("网关处理响应异常", e);
@@ -274,8 +280,7 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         return response.writeWith(Mono.just(buffer)); // 返回错误信息
     }
 
-    // 处理调用过于频繁的错误
-    // 处理调用次数用尽的错误
+    // 处理调用过于频繁的错误、调用次数用尽的错误
     public Mono<Void> handleInvokeTooFrequentlyError(ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.FORBIDDEN); // 设置响应状态为403
         String message = "您的调用过于频繁，请稍后重试"; // 错误信息
@@ -284,8 +289,17 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         return response.writeWith(Mono.just(buffer)); // 返回错误信息
     }
 
+    // 处理调用过于频繁的错误、调用次数用尽的错误
+    public Mono<Void> handleParamsError(ServerHttpResponse response) {
+        response.setStatusCode(HttpStatus.FORBIDDEN); // 设置响应状态为403
+        String message = "参数填写错误，请检查输入参数"; // 错误信息
+        DataBuffer buffer = response.bufferFactory().wrap(message.getBytes(StandardCharsets.UTF_8)); // 包装错误信息
+        response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8"); // 设置响应头
+        return response.writeWith(Mono.just(buffer)); // 返回错误信息
+    }
+
     @Override
     public int getOrder() {
-        return 2; // 指定过滤器的执行顺序
+        return -1; // 指定过滤器的执行顺序
     }
 }

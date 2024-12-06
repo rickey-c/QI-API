@@ -53,7 +53,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
      * through the given {@link GatewayFilterChain}.
      *
      * @param exchange the current server exchange
-     * @param chain    provides a way to delegate to the next filter
+     * @param chain    provides a way to delegate to the next handleResponse
      * @return {@code Mono<Void>} to indicate when request processing is complete
      */
     @Override

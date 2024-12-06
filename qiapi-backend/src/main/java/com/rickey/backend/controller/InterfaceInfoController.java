@@ -403,33 +403,51 @@ public class InterfaceInfoController {
     private Object invokeInterfaceInfo(String classPath, String methodName, String userRequestParams,
                                        String accessKey, String secretKey) {
         try {
+            // 1. 动态加载目标类（根据类的路径classPath）
+            log.info("加载类：{}", classPath);
             Class<?> clientClazz = Class.forName(classPath);
-            // 1. 获取构造器，参数为ak,sk
+
+            // 2. 获取类的构造器，构造器需要两个参数：accessKey和secretKey
+            log.info("获取构造器，构造器参数：accessKey, secretKey");
             Constructor<?> binApiClientConstructor = clientClazz.getConstructor(String.class, String.class);
-            // 2. 构造出客户端
+
+            // 3. 通过构造器创建客户端实例
+            log.info("通过构造器创建API客户端实例...");
             Object apiClient = binApiClientConstructor.newInstance(accessKey, secretKey);
 
-            // 3. 找到要调用的方法
+            // 4. 查找目标方法（methodName）
+            log.info("查找目标方法：{}", methodName);
             Method[] methods = clientClazz.getMethods();
             for (Method method : methods) {
                 if (method.getName().equals(methodName)) {
-                    // 3.1 获取参数类型列表
+                    // 4.1 如果方法的参数列表为空，直接调用该方法
+                    log.info("找到目标方法：{}", methodName);
                     Class<?>[] parameterTypes = method.getParameterTypes();
                     if (parameterTypes.length == 0) {
-                        // 如果没有参数，直接调用
+                        log.info("方法无参数，直接调用...");
                         return method.invoke(apiClient);
                     }
-                    // 构造参数
+
+                    // 4.2 如果方法需要参数，构造参数
+                    log.info("方法需要参数，解析请求参数...");
                     Object parameter = gson.fromJson(userRequestParams, parameterTypes[0]);
-                    log.info("parameter = {}", parameter);
+                    log.info("解析后的参数：{}", parameter);
+
+                    // 4.3 调用该方法并传入构造的参数
+                    log.info("调用方法：{}，并传入参数", methodName);
                     return method.invoke(apiClient, parameter);
                 }
             }
+
+            // 如果没有找到对应的方法，返回null
+            log.warn("未找到对应的目标方法：{}", methodName);
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            // 捕获异常并打印堆栈信息，抛出业务异常
+            log.error("调用接口发生异常", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "找不到调用的方法!! 请检查你的请求参数是否正确!");
         }
     }
+
 
 }
