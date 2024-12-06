@@ -63,7 +63,8 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         log.info("SessionExpireFilter:请求路径:{}", webPath);
         List<String> skipPaths = Arrays.asList(
                 "/api/user/login",
-                "/api/interfaceInvoke/**"
+                "/api/interfaceInvoke/**",
+                "/api/interfaceInfo/sdk"
         );
 
         // 跳过特定路径
