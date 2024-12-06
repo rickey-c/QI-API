@@ -91,6 +91,14 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
         String sign = headers.getFirst("sign"); // 获取签名
         String body = headers.getFirst("body"); // 获取请求体
 
+        // 假设请求头中的 body 使用 ISO-8859-1 编码
+        byte[] bytes = body.getBytes(StandardCharsets.ISO_8859_1);
+
+        // 将它转换为 UTF-8 编码
+        String convertedBody = new String(bytes, StandardCharsets.UTF_8);
+
+        // 打印转换后的 body 内容
+        log.info("Converted body: {}", convertedBody);
 
         log.info("接收到请求的头部信息：accessKey = {}, nonce = {}, timestamp = {}, sign = {}, body = {}",
                 accessKey, nonce, timestamp, sign, body);
@@ -138,7 +146,7 @@ public class InterfaceInvokeFilter implements GlobalFilter, Ordered {
 
         // 从数据库中查找用户的 secretKey
         String secretKey = invokeUser.getSecretKey();
-        String serverSign = SignUtils.genSign(body, secretKey);
+        String serverSign = SignUtils.genSign(convertedBody, secretKey);
 
         // 验证签名是否匹配
         if (sign == null || !sign.equals(serverSign)) {

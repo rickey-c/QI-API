@@ -31,6 +31,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -356,11 +357,13 @@ public class InterfaceInfoController {
      */
     @PostMapping("/invoke")
     public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
-                                                    HttpServletRequest request) {
+                                                    HttpServletRequest request) throws UnsupportedEncodingException {
         // 1.判断接口是否存在
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // request.setCharacterEncoding("utf-8");
+        log.info("params = {}", interfaceInfoInvokeRequest.getUserRequestParams());
         long id = interfaceInfoInvokeRequest.getId();
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
         log.info("调用的接口id = {}", id);

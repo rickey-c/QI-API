@@ -10,7 +10,7 @@ public class DayApiClient extends CommonApiClient {
     }
 
     public String getDayWallpaperUrl() {
-        return HttpRequest.get(GATEWAY_HOST + "/api/interface/day/wallpaper")
+        return HttpRequest.get(GATEWAY_HOST + "/api/interfaceInvoke/day/wallpaper")
                 .addHeaders(getHeadMap(null, accessKey, secretKey))
                 .execute().body();
     }

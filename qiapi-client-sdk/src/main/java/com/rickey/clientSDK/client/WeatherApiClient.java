@@ -13,11 +13,14 @@ public class WeatherApiClient extends CommonApiClient {
 
 
     public String getCurrentWeatherByCity(WeatherParam weatherParam) {
+        // 将参数对象转为 JSON 字符串
         String json = JSONUtil.toJsonStr(weatherParam);
         return HttpRequest.post(GATEWAY_HOST + "/api/interfaceInvoke/weather/now")
                 .addHeaders(getHeadMap(json, accessKey, secretKey))
                 .body(json)
-                .execute().body();
+                .execute()
+                .body();
     }
+
 
 }
