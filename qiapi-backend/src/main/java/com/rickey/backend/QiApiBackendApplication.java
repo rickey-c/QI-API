@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDubbo
 @EnableCaching
 @EnableScheduling
-public class QiapiBackendApplication {
+public class QiApiBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QiapiBackendApplication.class, args);
+        SpringApplication.run(QiApiBackendApplication.class, args);
     }
 
 }

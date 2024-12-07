@@ -87,7 +87,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.rickey.backend.QiapiBackendApplication</mainClass>
+                    <mainClass>com.rickey.backend.QiApiBackendApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>

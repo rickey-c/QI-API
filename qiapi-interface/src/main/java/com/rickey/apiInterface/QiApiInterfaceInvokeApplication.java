@@ -9,10 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @MapperScan("com.rickey.apiInterface.mapper")
-public class QiapiInterfaceApplication {
+public class QiApiInterfaceInvokeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QiapiInterfaceApplication.class, args);
+        SpringApplication.run(QiApiInterfaceInvokeApplication.class, args);
     }
 
 }

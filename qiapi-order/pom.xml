@@ -90,7 +90,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.rickey.order.QiapiOrderApplication</mainClass>
+                    <mainClass>com.rickey.order.QiApiOrderApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>

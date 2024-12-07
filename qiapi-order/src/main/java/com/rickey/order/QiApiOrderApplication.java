@@ -10,10 +10,10 @@ import org.springframework.cache.annotation.EnableCaching;
 @MapperScan("com.rickey.order.mapper")
 @EnableDubbo
 @EnableCaching
-public class QiapiOrderApplication {
+public class QiApiOrderApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QiapiOrderApplication.class, args);
+        SpringApplication.run(QiApiOrderApplication.class, args);
     }
 
 }

@@ -20,10 +20,10 @@ import org.springframework.stereotype.Service;
 @EnableDubbo
 @Service
 @EnableCaching
-public class QiapiGatewayApplication {
+public class QiApiGatewayApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext context =
-                SpringApplication.run(QiapiGatewayApplication.class, args);
+                SpringApplication.run(QiApiGatewayApplication.class, args);
     }
 
 }

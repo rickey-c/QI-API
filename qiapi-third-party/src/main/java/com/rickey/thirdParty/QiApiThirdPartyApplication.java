@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableDubbo
-public class QiapiThirdPartyApplication {
+public class QiApiThirdPartyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QiapiThirdPartyApplication.class, args);
+        SpringApplication.run(QiApiThirdPartyApplication.class, args);
     }
 
 }

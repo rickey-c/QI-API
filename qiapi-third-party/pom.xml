@@ -125,7 +125,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.rickey.thirdParty.QiapiThirdPartyApplication</mainClass>
+                    <mainClass>com.rickey.thirdParty.QiApiThirdPartyApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>
