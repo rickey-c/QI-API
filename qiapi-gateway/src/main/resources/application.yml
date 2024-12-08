@@ -21,7 +21,7 @@ spring:
       default-filters:
         - AddResponseHeader=source, rickey
       # 'requestFrom': 'Frontend', // 添加请求头，表示请求是从前端发出的
-      # 断言设计，目前有backend,interface,order,thirdParty
+      # 断言设计，目前有core,interface,order,thirdParty
       routes:
         - id: order
           uri: http://localhost:7530
@@ -35,7 +35,7 @@ spring:
           uri: http://localhost:8123
           predicates:
             - Path=/api/interfaceInvoke/**
-        - id: backend
+        - id: core
           uri: http://localhost:7529
           predicates:
             - Path=/api/**

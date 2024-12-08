@@ -2,100 +2,109 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.rickey.thirdParty</groupId>
     <artifactId>qiapi-third-party</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>qiapi-third-party</name>
     <description>qiapi-third-party</description>
-    <properties>
-        <java.version>1.8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot.version>2.6.13</spring-boot.version>
-    </properties>
+
     <parent>
-        <groupId>com.rickey</groupId>
+        <groupId>com.rickey.qiapi</groupId>
         <artifactId>Qi-API</artifactId>
         <version>0.0.1</version>
     </parent>
+
     <dependencies>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- fastjson -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.62</version>
-        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--web依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <!--        支付宝依赖沙箱支付 -->
+
+        <!--支付宝沙箱sdk-->
         <dependency>
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-easysdk</artifactId>
-            <version>2.2.0</version>
         </dependency>
-        <!--        支付宝相关-->
+
+        <!--支付宝相关依赖-->
         <dependency>
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-sdk-java</artifactId>
-            <version>4.34.0.ALL</version>
         </dependency>
-        <!--文档依赖-->
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
-            <version>3.0.0</version>
         </dependency>
-        <!-- https://doc.xiaominfo.com/knife4j/documentation/get_start.html-->
+
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
-            <version>3.0.3</version>
         </dependency>
+
         <!--RocketMQ依赖-->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-spring-boot-starter</artifactId>
-            <version>2.3.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client</artifactId>
-            <version>5.3.1</version>
-        </dependency>
-        <!-- 还有其它需要的jar包自由引入（注：fastjson不要使用低于1.2.60版本，会有安全漏洞） -->
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.62</version>
         </dependency>
+
         <!--UniSMS服务-->
         <dependency>
             <groupId>com.apistd.uni</groupId>
             <artifactId>uni-sdk</artifactId>
-            <version>0.0.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rickey</groupId>
+            <artifactId>qiapi-common</artifactId>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

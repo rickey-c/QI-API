@@ -3,18 +3,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.rickey.order</groupId>
-    <artifactId>qiapi-order</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-
-    <name>qiapi-order</name>
-    <description>qiapi-order</description>
-
     <parent>
         <groupId>com.rickey.qiapi</groupId>
         <artifactId>Qi-API</artifactId>
         <version>0.0.1</version>
     </parent>
+
+    <groupId>com.rickey.core</groupId>
+    <artifactId>qiapi-core</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <name>qiapi-core</name>
+    <description>
+        Core
+    </description>
 
     <dependencies>
 
@@ -28,10 +30,36 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
+        <!--redis-session依赖-->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
+        <!--redis缓存依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rickey</groupId>
+            <artifactId>qiapi-common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -46,28 +74,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!--redis-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <!--redis缓存依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-
-        <!--jedis客户端-->
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
-            <artifactId>qiapi-common</artifactId>
-            <version>0.0.1</version>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
         </dependency>
 
         <dependency>
@@ -76,59 +95,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.rickey</groupId>
+            <artifactId>qiapi-client-sdk</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
         </dependency>
 
-        <!--RocketMQ依赖-->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
-        </dependency>
-
-        <!--sentinel控制台依赖-->
-        <dependency>
-            <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-transport-simple-http</artifactId>
-        </dependency>
-
-        <!--aspectj依赖，添加了降级熔断策略-->
-        <dependency>
-            <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-annotation-aspectj</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.nacos</groupId>
-            <artifactId>nacos-client</artifactId>
-        </dependency>
-
-
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -139,12 +119,13 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.rickey.order.QiApiOrderApplication</mainClass>
+                    <mainClass>com.rickey.core.QiApiCoreApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>
@@ -156,6 +137,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 
