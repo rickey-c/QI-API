@@ -5,7 +5,7 @@ server:
     context-path: /api/interfaceInvoke
 spring:
   application:
-    name: qiapi-interface
+    name: qiapi-interfaceInvoke
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,4 +23,9 @@ spring:
       filter:
         url-patterns: /**
       web-context-unify: false
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+
 

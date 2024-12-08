@@ -113,6 +113,12 @@
             <artifactId>nacos-client</artifactId>
         </dependency>
 
+        <!--nacos注册中心-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <version>2021.0.5.0</version>
+        </dependency>
 
     </dependencies>
     <dependencyManagement>
