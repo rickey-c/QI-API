@@ -21,8 +21,11 @@ spring:
     database: 0
   cache:
     type: redis
-#  main:
-#    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
 server:
   port: 7529
   servlet:
@@ -38,7 +41,7 @@ mybatis-plus:
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
 dubbo:
   application:
-    name: qiapi-core
+    name: qiapi-core-dubbo
   registry:
     address: nacos://localhost:8848
   protocol:

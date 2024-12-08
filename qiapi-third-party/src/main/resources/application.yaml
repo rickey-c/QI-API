@@ -1,6 +1,6 @@
 spring:
   application:
-    name: qiapi-third-party
+    name: qiapi-thirdParty
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/qiapi
@@ -9,7 +9,10 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
 server:
   port: 7531
   servlet:
@@ -17,7 +20,7 @@ server:
 
 dubbo:
   application:
-    name: qiapi-thirdParty
+    name: qiapi-thirdParty-dubbo
   registry:
     address: nacos://localhost:8848
   protocol:
