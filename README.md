@@ -10,7 +10,7 @@
 。使用Nacos作为注册中心，完成服务注册与发现，通过各模块主要功能以及业务进行模块的合理划分。使用 Sentinel 进行 **接口流量管理
 **，通过限流策略有效保障服务的稳定性与安全性。同时使用 RocketMQ 对涉及第三方回调接口的业务进行 **异步通知**，实现服务链路解耦。
 
-项目客户端依赖**「qiapi-clientSDK-spring-boot-starter」**已上传至Maven Central
+项目客户端依赖「**qiapi-clientSDK-spring-boot-starter**」已上传至Maven Central
 Repository，用户可以选择在接口平台在线调用或者在项目中引入依赖并传入accessKey、secretKey进行API调用。
 
 > 在线体验地址：[Qi-API](https://www.rickey-qiapi.cn/)
