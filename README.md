@@ -25,7 +25,7 @@ Repository，用户可以选择在接口平台在线调用或者在项目中引�
 
 ## 系统架构
 
-![Qi-API-Architecture Diagram](./qiapi-doc/Architecture Diagram/Qi-API-Architecture Diagram.png)
+![image](https://github.com/rickey-c/qiapi-backend/blob/master/qiapi-doc/Architecture%20Diagram/Qi-API-Architecture%20Diagram.png)
 
 ## 技术栈
 
