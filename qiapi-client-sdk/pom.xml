@@ -4,18 +4,45 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.rickey.qiapi</groupId>
-        <artifactId>Qi-API</artifactId>
-        <version>0.0.1</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.6.8</version>
+        <relativePath/>
     </parent>
 
-    <groupId>com.rickey</groupId>
-    <artifactId>qiapi-client-sdk</artifactId>
+    <groupId>io.github.rickey-c</groupId>
+    <artifactId>qiapi-clientSDK-spring-boot-starter</artifactId>
     <version>0.0.1</version>
     <name>qiapi-client-sdk</name>
     <description>
         Qi-APi sdk,user can download this and put their ak、sk to invoke interface
     </description>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>rickey-c</id>
+            <name>rickey-c</name>
+            <email>1604120019@qq.com</email>
+            <roles>
+                <role>Project Manager</role>
+                <role>Architect</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/rickey-c/qiapi-backend.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/rickey-c/qiapi-backend.git
+        </developerConnection>
+        <url>https://github.com/rickey-c/qiapi-backend</url>
+    </scm>
 
     <properties>
         <java.version>8</java.version>
@@ -36,12 +63,14 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
+            <version>5.8.9</version>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+            <version>1.18.30</version>
         </dependency>
 
         <dependency>
@@ -53,17 +82,79 @@
         <dependency>
             <groupId>com.github.eagle6688</groupId>
             <artifactId>devutility.external.javax.validation</artifactId>
+            <version>1.0.4</version>
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
+            <groupId>com.rickey.qiapi</groupId>
             <artifactId>qiapi-common</artifactId>
+            <optional>true</optional>
+            <version>0.0.1</version>
         </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
+            <!--   central发布插件    -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
+            </plugin>
+            <!--   source源码插件   官方要求 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--   javadoc插件  官方要求  -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <executable>"D:\工具软件\GnuPG\bin\gpg.exe"</executable>
+                    <keyname>rickey-c</keyname>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -44,13 +44,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
+            <groupId>com.rickey.qiapi</groupId>
             <artifactId>qiapi-common</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.rickey</groupId>
-            <artifactId>qiapi-client-sdk</artifactId>
         </dependency>
 
         <dependency>

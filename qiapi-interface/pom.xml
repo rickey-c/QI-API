@@ -9,7 +9,7 @@
         <version>0.0.1</version>
     </parent>
 
-    <groupId>com.rickey</groupId>
+    <groupId>com.rickey.qiapi</groupId>
     <artifactId>qiapi-interface</artifactId>
     <version>0.0.1</version>
 
@@ -18,11 +18,6 @@
 
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.rickey</groupId>
-            <artifactId>qiapi-client-sdk</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -65,7 +65,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
+            <groupId>com.rickey.qiapi</groupId>
             <artifactId>qiapi-common</artifactId>
             <version>0.0.1</version>
         </dependency>

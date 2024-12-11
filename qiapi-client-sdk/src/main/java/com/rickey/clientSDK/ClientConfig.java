@@ -1,9 +1,6 @@
 package com.rickey.clientSDK;
 
-import com.rickey.clientSDK.client.DayApiClient;
-import com.rickey.clientSDK.client.IpApiClient;
-import com.rickey.clientSDK.client.NameApiClient;
-import com.rickey.clientSDK.client.RandomApiClient;
+import com.rickey.clientSDK.client.*;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,5 +39,11 @@ public class ClientConfig {
     public IpApiClient ipApiClient() {
         return new IpApiClient(accessKey, secretKey);
     }
+
+    @Bean
+    public WeatherApiClient weatherApiClient() {
+        return new WeatherApiClient(accessKey, secretKey);
+    }
+
 
 }

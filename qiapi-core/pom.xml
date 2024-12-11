@@ -48,11 +48,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
-            <artifactId>qiapi-common</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
         </dependency>
@@ -100,13 +95,18 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
-            <artifactId>qiapi-client-sdk</artifactId>
+            <groupId>io.github.rickey-c</groupId>
+            <artifactId>qiapi-clientSDK-spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rickey.qiapi</groupId>
+            <artifactId>qiapi-common</artifactId>
         </dependency>
 
     </dependencies>
@@ -128,10 +128,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.rickey.core.QiApiCoreApplication</mainClass>
-                    <skip>true</skip>
+                    <layout>JAR</layout>
                 </configuration>
                 <executions>
                     <execution>

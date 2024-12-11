@@ -101,7 +101,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.rickey</groupId>
+            <groupId>com.rickey.qiapi</groupId>
             <artifactId>qiapi-common</artifactId>
         </dependency>
 

@@ -9,10 +9,15 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * @author adorabled4
- * @className FileSuffixParam
- * @date : 2023/12/29/ 00:30
- **/
+ * IP 分析参数类，用于封装 IP 分析请求所需的参数。
+ *
+ * 该类包含以下字段：
+ * <ul>
+ *     <li>ip：目标 IP 地址，不能为空</li>
+ * </ul>
+ *
+ * @author rickey-c
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,7 +25,12 @@ import java.io.Serializable;
 public class IpAnaParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 目标 IP 地址
+     * <p>
+     * 该字段不能为空。
+     */
     @NotNull(message = "参数不能为空")
     private String ip;
-
 }

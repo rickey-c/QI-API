@@ -47,8 +47,6 @@
         <module>qiapi-interface</module>
         <module>qiapi-order</module>
         <module>qiapi-third-party</module>
-        <module>qiapi-common</module>
-        <module>qiapi-client-sdk</module>
     </modules>
 
     <dependencyManagement>
@@ -154,14 +152,14 @@
             </dependency>
 
             <dependency>
-                <groupId>com.rickey</groupId>
+                <groupId>com.rickey.qiapi</groupId>
                 <artifactId>qiapi-common</artifactId>
                 <version>0.0.1</version>
             </dependency>
 
             <dependency>
-                <groupId>com.rickey</groupId>
-                <artifactId>qiapi-client-sdk</artifactId>
+                <groupId>io.github.rickey-c</groupId>
+                <artifactId>qiapi-clientSDK-spring-boot-starter</artifactId>
                 <version>0.0.1</version>
             </dependency>
 
@@ -353,12 +351,6 @@
                 <version>4.12.0</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>com.github.eagle6688</groupId>
-                <artifactId>devutility.external.javax.validation</artifactId>
-                <version>1.0.4</version>
-            </dependency>
 
         </dependencies>
     </dependencyManagement>
