@@ -1,6 +1,6 @@
 package com.rickey.apiInterface.sentinel;
 
-import com.rickey.clientSDK.model.User;
+import com.rickey.common.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;

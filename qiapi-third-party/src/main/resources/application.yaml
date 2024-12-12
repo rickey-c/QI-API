@@ -13,6 +13,25 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
+  mail:
+    host: smtp.qq.com
+    username: 1604120019@qq.com
+    password: pvysabtfnjubgiga
+    port: 465
+    default-encoding: utf-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
 server:
   port: 7531
   servlet:
