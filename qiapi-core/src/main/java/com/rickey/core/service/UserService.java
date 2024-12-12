@@ -3,8 +3,10 @@ package com.rickey.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rickey.common.model.entity.User;
+import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 
 /**
  * 用户服务
@@ -14,12 +16,13 @@ public interface UserService extends IService<User> {
     /**
      * 用户注册
      *
-     * @param userAccount   用户账户
+     * @param email   用户邮箱
      * @param userPassword  用户密码
      * @param checkPassword 校验密码
+     * @param code 验证码
      * @return 新用户 id
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String email, String userPassword, String checkPassword, String code);
 
     /**
      * 用户登录
@@ -49,4 +52,6 @@ public interface UserService extends IService<User> {
     boolean userLogout(HttpServletRequest request);
 
     User getUserByToken(String token);
+
+    void sendEmail(String email) throws MessagingException, UnsupportedEncodingException;
 }

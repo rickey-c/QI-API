@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.rickey.common.service.InnerEmailService;
 import com.rickey.core.model.dto.user.*;
 import com.rickey.core.model.vo.UserVO;
 import com.rickey.core.service.UserService;
@@ -18,8 +19,10 @@ import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
 import com.rickey.common.utils.CookieUtil;
 import com.rickey.common.utils.ResultUtils;
+import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
@@ -27,8 +30,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +43,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
+    @DubboReference
+    private InnerEmailService emailService;
 
     private final UserService userService;
 
@@ -54,7 +62,24 @@ public class UserController {
         this.redisUtil = redisUtil;
     }
 
-    // region 登录相关
+    /**
+     * 发送短信接口
+     *
+     * @param email
+     */
+    @GetMapping("/email")
+    public BaseResponse<String> sendEmail(String email) throws MessagingException, UnsupportedEncodingException {
+        // 使用redis-SETNX保证不会重设
+        String emailCodeKey = email + ":code";
+        String code = (String) redisUtil.get(emailCodeKey);
+        if (Objects.nonNull(code)) {
+            // redisKey还没消失，
+            return ResultUtils.error(405, "短信已发送，请检查邮箱或稍后重试");
+        } else {
+            userService.sendEmail(email);
+        }
+        return ResultUtils.success("发送短信成功，请注意查收");
+    }
 
     /**
      * 用户注册
@@ -67,13 +92,14 @@ public class UserController {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userAccount = userRegisterRequest.getUserAccount();
+        String email = userRegisterRequest.getEmail();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        String code = userRegisterRequest.getCode();
+        if (StringUtils.isAnyBlank(email, userPassword, checkPassword, code)) {
             return null;
         }
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        long result = userService.userRegister(email, userPassword, checkPassword, code);
         return ResultUtils.success(result);
     }
 

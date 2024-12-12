@@ -58,6 +58,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         List<String> skipPaths = Arrays.asList(
                 "/api/user/register",
                 "/api/user/login",
+                "/api/user/email",
                 "/api/interfaceInvoke/**",
                 "/api/interfaceInfo/sdk"
         );
