@@ -5,15 +5,17 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rickey.common.service.InnerEmailService;
-import com.rickey.core.constant.UserConstant;
-import com.rickey.core.mapper.UserMapper;
-import com.rickey.core.service.UserService;
-import com.rickey.core.utils.RedisUtil;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
+import com.rickey.common.service.InnerEmailService;
+import com.rickey.core.constant.UserConstant;
+import com.rickey.core.mapper.UserMapper;
+import com.rickey.core.model.vo.UserDevKeyVO;
+import com.rickey.core.service.UserService;
+import com.rickey.core.utils.RedisUtil;
 import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -189,6 +191,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 发送短信，存入redis
         String newCode = emailService.sendEmail(email);
         redisUtil.set(emailCodeKey, newCode, 180);
+    }
+
+    /**
+     * 重新生成ak，sk
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public UserDevKeyVO genKey(HttpServletRequest request) {
+        String userId = request.getHeader("userId");
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        UserDevKeyVO userDevKeyVO = this.genKey(userId);
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", userId);
+        updateWrapper.set("accessKey", userDevKeyVO.getAccessKey());
+        updateWrapper.set("secretKey", userDevKeyVO.getSecretKey());
+        this.update(updateWrapper);
+        //重置登录用户的ak,sk信息
+        return userDevKeyVO;
+    }
+
+    private UserDevKeyVO genKey(String userAccount) {
+        String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
+        String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
+        UserDevKeyVO userDevKeyVO = new UserDevKeyVO();
+        userDevKeyVO.setAccessKey(accessKey);
+        userDevKeyVO.setSecretKey(secretKey);
+        return userDevKeyVO;
     }
 
 }

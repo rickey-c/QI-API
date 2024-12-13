@@ -3,6 +3,7 @@ package com.rickey.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rickey.common.model.entity.User;
+import com.rickey.core.model.vo.UserDevKeyVO;
 import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,10 +35,8 @@ public interface UserService extends IService<User> {
     User userLogin(String userAccount, String userPassword);
 
 
-
     /**
      * 是否为管理员
-     *
      * @param request
      * @return
      */
@@ -45,13 +44,32 @@ public interface UserService extends IService<User> {
 
     /**
      * 用户注销
-     *
      * @param request
      * @return
      */
     boolean userLogout(HttpServletRequest request);
 
+    /**
+     * 通过token获取用户信息
+     *
+     * @param token
+     * @return
+     */
     User getUserByToken(String token);
 
+    /**
+     * 发送邮箱
+     * @param email
+     * @throws MessagingException
+     * @throws UnsupportedEncodingException
+     */
     void sendEmail(String email) throws MessagingException, UnsupportedEncodingException;
+
+    /**
+     * 重新生成ak，sk
+     *
+     * @param request
+     * @return
+     */
+    UserDevKeyVO genKey(HttpServletRequest request);
 }

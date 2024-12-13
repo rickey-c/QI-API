@@ -7,18 +7,19 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.rickey.common.service.InnerEmailService;
-import com.rickey.core.model.dto.user.*;
-import com.rickey.core.model.vo.UserVO;
-import com.rickey.core.service.UserService;
-import com.rickey.core.utils.RedisUtil;
 import com.rickey.common.common.BaseResponse;
 import com.rickey.common.common.DeleteRequest;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
 import com.rickey.common.model.entity.User;
+import com.rickey.common.service.InnerEmailService;
 import com.rickey.common.utils.CookieUtil;
 import com.rickey.common.utils.ResultUtils;
+import com.rickey.core.model.dto.user.*;
+import com.rickey.core.model.vo.UserDevKeyVO;
+import com.rickey.core.model.vo.UserVO;
+import com.rickey.core.service.UserService;
+import com.rickey.core.utils.RedisUtil;
 import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -331,5 +332,29 @@ public class UserController {
         return ResultUtils.success(userVOPage);
     }
 
-    // endregion
+
+    @GetMapping("/key")
+    public BaseResponse<UserDevKeyVO> getKey(HttpServletRequest request) {
+        String userId = request.getHeader("userId");
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", userId);
+        queryWrapper.select("accessKey", "secretKey");
+        User user = userService.getOne(queryWrapper);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        UserDevKeyVO userDevKeyVO = new UserDevKeyVO();
+        userDevKeyVO.setSecretKey(user.getSecretKey());
+        userDevKeyVO.setAccessKey(user.getAccessKey());
+        return ResultUtils.success(userDevKeyVO);
+    }
+
+    @PostMapping("/gen/key")
+    public BaseResponse<UserDevKeyVO> genKey(HttpServletRequest request) {
+        UserDevKeyVO userDevKeyVO = userService.genKey(request);
+        return ResultUtils.success(userDevKeyVO);
+    }
 }

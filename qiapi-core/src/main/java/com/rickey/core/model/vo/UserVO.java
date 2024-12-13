@@ -38,9 +38,9 @@ public class UserVO implements Serializable {
     private Integer gender;
 
     /**
-     * 用户角色: user, admin
+     * sk
      */
-    private String userRole;
+    private String secretKey;
 
     /**
      * 创建时间
