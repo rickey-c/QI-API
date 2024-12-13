@@ -38,6 +38,9 @@ public class RandomController {
     }
 
     @GetMapping("/image")
+    @SentinelResource(value = "RandomController",
+            blockHandler = "RandomControllerBlockHandler", blockHandlerClass = BlockHandlerService.class,
+            fallback = "RandomControllerFallback", fallbackClass = FallbackService.class)
     public String getRandomImageUrl() {
         // 直接构造GET请求，传递必要的参数
         String url = "https://www.dmoe.cc/random.php?return=json";

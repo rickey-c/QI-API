@@ -43,6 +43,41 @@ public class SentinelConfig {
         RandomController.setCount(200);
         // 添加规则
         rules.add(RandomController);
+
+        // 规则名称
+        FlowRule IpController = new FlowRule();
+        // 资源名称
+        IpController.setResource("IpController");
+        // 策略:基于QPS的流量控制
+        IpController.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        // Set limit QPS to 200,需要访问到数据库，流量控制得小一点.
+        IpController.setCount(200);
+        // 添加规则
+        rules.add(IpController);
+
+        // 规则名称
+        FlowRule DayController = new FlowRule();
+        // 资源名称
+        DayController.setResource("DayController");
+        // 策略:基于QPS的流量控制
+        DayController.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        // Set limit QPS to 200,需要访问到数据库，流量控制得小一点.
+        DayController.setCount(200);
+        // 添加规则
+        rules.add(DayController);
+
+        // 规则名称
+        FlowRule WeatherController = new FlowRule();
+        // 资源名称
+        WeatherController.setResource("WeatherController");
+        // 策略:基于QPS的流量控制
+        WeatherController.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        // Set limit QPS to 200,需要访问到数据库，流量控制得小一点.
+        WeatherController.setCount(200);
+        // 添加规则
+        rules.add(WeatherController);
+
+
         // Manager加载规则
         FlowRuleManager.loadRules(rules);
     }

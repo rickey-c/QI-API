@@ -3,6 +3,7 @@ package com.rickey.apiInterface;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.rickey.apiInterface.model.entity.City;
 import com.rickey.apiInterface.service.CityService;
+import com.rickey.apiInterface.service.WeatherService;
 import com.rickey.apiInterface.util.IpUtil;
 import com.rickey.common.common.ErrorCode;
 import com.rickey.common.exception.BusinessException;
@@ -25,6 +26,9 @@ class QiapiInterfaceApplicationTests {
     @Autowired
     private CityService cityService;
 
+    @Autowired
+    private WeatherService weatherService;
+
     @Test
     void IpTest() throws UnknownHostException {
         String ip = "112.48.20.177";
@@ -44,6 +48,12 @@ class QiapiInterfaceApplicationTests {
         log.info("city = {}", city);
         BaseMapper<City> baseMapper = cityService.getBaseMapper();
         log.info("baseMapper = {}", baseMapper);
+    }
+
+    @Test
+    void weatherTest() {
+        String weather = weatherService.getWeatherByCityName("北京市");
+        log.info("weather = {}", weather);
     }
 
 }
