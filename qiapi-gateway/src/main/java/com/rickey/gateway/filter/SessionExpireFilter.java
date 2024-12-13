@@ -73,7 +73,7 @@ public class SessionExpireFilter implements GlobalFilter, Ordered {
         HttpCookie token = request.getCookies().getFirst(COOKIE_NAME);
 
         // 校验 IP 和 Token
-        if ("127.0.0.1".equals(remoteAddr.getHostAddress())) {
+        if ("0:0:0:0:0:0:0:1".equals(remoteAddr.getHostAddress())) {
             return handleTokenValidation(exchange, chain, token);
         } else {
             return handleRateLimitAndTokenValidation(exchange, chain, token, remoteAddr);
