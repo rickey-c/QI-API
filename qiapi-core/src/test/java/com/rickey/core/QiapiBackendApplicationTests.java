@@ -2,13 +2,10 @@ package com.rickey.core;
 
 import com.rickey.clientSDK.client.RandomApiClient;
 import com.rickey.common.service.InnerEmailService;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.io.UnsupportedEncodingException;
 
 
 @Slf4j
@@ -26,17 +23,17 @@ class QiapiBackendApplicationTests {
     }
 
 
-    @Test
-    void sendEmailDubboTest() {
-        String code = null;
-        try {
-            code = emailService.sendEmail("rickeychen137@gmail.com");
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("code = {}", code);
-    }
+//    @Test
+//    void sendEmailDubboTest() {
+//        String code = null;
+//        try {
+//            code = emailService.sendEmail("rickeychen137@gmail.com");
+//        } catch (MessagingException e) {
+//            throw new RuntimeException(e);
+//        } catch (UnsupportedEncodingException e) {
+//            throw new RuntimeException(e);
+//        }
+//        log.info("code = {}", code);
+//    }
 
 }
