@@ -24,7 +24,7 @@ public class CommonApiClient {
     /**
      * API 网关的主机地址。
      */
-    protected static final String GATEWAY_HOST = "http://localhost:8090";
+    protected static final String GATEWAY_HOST = "http://124.222.215.143:8090";
 
     /**
      * 构造函数，用于初始化 API 客户端实例。
