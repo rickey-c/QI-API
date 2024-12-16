@@ -11,7 +11,7 @@
 
     <groupId>com.rickey.core</groupId>
     <artifactId>qiapi-core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <name>qiapi-core</name>
     <description>
@@ -127,6 +127,10 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                    </compilerArgs>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
 

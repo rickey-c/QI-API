@@ -5,7 +5,7 @@
 
     <groupId>com.rickey.thirdParty</groupId>
     <artifactId>qiapi-third-party</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <name>qiapi-third-party</name>
     <description>qiapi-third-party</description>
@@ -144,6 +144,10 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                    </compilerArgs>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
             <plugin>
@@ -152,11 +156,9 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.rickey.thirdParty.QiApiThirdPartyApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>repackage</id>
                         <goals>
                             <goal>repackage</goal>
                         </goals>

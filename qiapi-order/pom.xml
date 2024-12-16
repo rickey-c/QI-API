@@ -5,7 +5,7 @@
 
     <groupId>com.rickey.order</groupId>
     <artifactId>qiapi-order</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <name>qiapi-order</name>
     <description>qiapi-order</description>
@@ -143,6 +143,10 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-XDignore.symbol.file</arg>
+                    </compilerArgs>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
             <plugin>
@@ -151,7 +155,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.rickey.order.QiApiOrderApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

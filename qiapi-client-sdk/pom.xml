@@ -12,7 +12,7 @@
 
     <groupId>io.github.rickey-c</groupId>
     <artifactId>qiapi-clientSDK-spring-boot-starter</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>qiapi-client-sdk</name>
     <description>
         Qi-APi sdk,user can download this and put their ak、sk to invoke interface
