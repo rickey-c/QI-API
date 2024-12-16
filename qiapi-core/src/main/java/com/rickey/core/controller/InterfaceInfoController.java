@@ -461,12 +461,12 @@ public class InterfaceInfoController {
     @GetMapping("/sdk")
     public void getSdk(HttpServletResponse response) throws IOException {
         // 获取要下载的文件
-        org.springframework.core.io.Resource resource = new ClassPathResource("qiapi-client-sdk-0.0.1.jar");
+        org.springframework.core.io.Resource resource = new ClassPathResource("qiapi-clientSDK-spring-boot-starter-0.0.2.jar");
         InputStream inputStream = resource.getInputStream();
 
         // 设置响应头
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=qiapi-client-sdk-0.0.1.jar");
+        response.setHeader("Content-Disposition", "attachment; filename=qiapi-clientSDK-spring-boot-starter-0.0.2.jar");
 
         // 将文件内容写入响应
         try (OutputStream out = response.getOutputStream()) {

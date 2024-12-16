@@ -23,6 +23,7 @@ public class WeatherController {
     @PostMapping("/now")
     @Operation(summary = "天气查询API")
     public String getCurrentWeatherByCity(@RequestBody WeatherParam weatherParam) {
+        log.info("weather接口被调用");
         // 获取城市名称
         String cityName = weatherParam.getCityName();
 
