@@ -36,8 +36,6 @@ import java.util.List;
 @Slf4j
 public class OrderController {
 
-    static final String BASE_URL = "http://localhost:8123/api";
-
     private final OrderService orderService;
 
     private final RedisTemplate redisTemplate;
