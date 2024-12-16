@@ -1,0 +1,35 @@
+# 公共配置文件
+server:
+  port: 8123
+  servlet:
+    context-path: /api/interfaceInvoke
+spring:
+  config:
+    import: classpath:myProperties.yaml
+  application:
+    name: qiapi-interfaceInvoke
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://qiapi-server:3306/qiapi
+    username: ${mysql.username}
+    password: ${mysql.password}
+  cloud:
+    sentinel:
+      transport:
+        dashboard: qiapi-server:8880
+        port: 8719
+      filter:
+        url-patterns: /**
+      web-context-unify: false
+    nacos:
+      discovery:
+        server-addr: qiapi-server:8848
+        username: ${nacos.username}
+        password: ${nacos.password}
+feign:
+  sentinel:
+    enabled: true
+
+
+

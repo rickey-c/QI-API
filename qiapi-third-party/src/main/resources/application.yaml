@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: qiapi-thirdParty
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://qiapi-server:3306/qiapi
+    username: ${mysql.username}
+    password: ${mysql.password}
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  cloud:
+    nacos:
+      discovery:
+        server-addr: qiapi-server:8848
+        username: ${nacos.username}
+        password: ${nacos.password}
+  mail:
+    host: smtp.qq.com
+    username: ${mail.username}
+    password: ${mail.password}
+    port: 465
+    default-encoding: utf-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+  config:
+    import: classpath:myProperties.yaml
+server:
+  port: 7531
+  servlet:
+    context-path: /api/thirdParty
+
+dubbo:
+  application:
+    name: qiapi-thirdParty-dubbo
+  registry:
+    address: nacos://qiapi-server:8848?username=${nacos.username}&password=${nacos.password}
+  protocol:
+    name: dubbo
+    port: 20883
+
+rocketmq:
+  name-server: qiapi-server:9876
+  producer:
+    # 发送同一类消息的设置为同一个group，保证唯一
+    group: order-group
+    # 发送消息超时时间，默认3000
+    send-message-timeout: 5000
+    # 发送消息失败重试次数，默认2
+    retryTimesWhenSendFailed: 2
+    # 异步消息重试此处，默认2
+    retryTimesWhenSendAsyncFailed: 2
+    # 消息最大长度，默认1024 * 1024 * 4(默认4M)
+    maxMessageSize: 4096
+    # 压缩消息阈值，默认4k(1024 * 4)
+    compressMessageBodyThreshold: 4096
+    # 是否在内部发送失败时重试另一个broker，默认false
+    retryNextServer: false
+
+

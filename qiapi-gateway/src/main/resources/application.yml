@@ -1,0 +1,71 @@
+# 公共配置文件
+server:
+  port: 8090
+spring:
+  application:
+    name: qiapi-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    nacos:
+      discovery:
+        server-addr: qiapi-server:8848
+        username: ${nacos.username}
+        password: ${nacos.password}
+    gateway:
+      # 网关全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+        # 解决options请求被拦截的问题
+        add-to-simple-url-handler-mapping: true
+      default-filters:
+        - AddResponseHeader=source, rickey
+      # 'requestFrom': 'Frontend', // 添加请求头，表示请求是从前端发出的
+      # 断言设计，目前有core,interface,order,thirdParty
+      discovery:
+        locator:
+          enabled: true # 自动从配置的服务发现客户端获取服务实例列表。
+      routes:
+        - id: order
+          uri: lb://qiapi-order
+          predicates:
+            - Path=/api/order/**
+        - id: thirdParty
+          uri: lb://qiapi-thirdParty
+          predicates:
+            - Path=/api/thirdParty/**
+        - id: interfaceInvoke
+          uri: lb://qiapi-interfaceInvoke
+          predicates:
+            - Path=/api/interfaceInvoke/**
+        - id: core
+          uri: lb://qiapi-core
+          predicates:
+            - Path=/api/**
+  redis:
+    host: qiapi-server
+    port: 6379
+    database: 0
+    password: ${redis.password}
+  cache:
+    type: redis
+  config:
+    import: classpath:myProperties.yaml
+
+logging:
+  level:
+    org.apache.dubbo: DEBUG
+
+dubbo:
+  application:
+    name: qiapi-gateway-dubbo
+  registry:
+    address: nacos://qiapi-server:8848?username=${nacos.username}&password=${nacos.password}
+  protocol:
+    name: dubbo
+    port: 20881
