@@ -9,9 +9,8 @@ import java.io.Serializable;
  */
 @Data
 public class UserInterfaceInfoAddRequest implements Serializable {
-
     /**
-     * 调用用户 id
+     * 用户id
      */
     private Long userId;
 
@@ -29,5 +28,11 @@ public class UserInterfaceInfoAddRequest implements Serializable {
      * 剩余调用次数
      */
     private Integer leftNum;
+
+    /**
+     * 申请的接口调用次数
+     */
+    private Integer invokeCount;
+
 
 }

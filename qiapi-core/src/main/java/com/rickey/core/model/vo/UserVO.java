@@ -33,6 +33,11 @@ public class UserVO implements Serializable {
     private String userAvatar;
 
     /**
+     *
+     */
+    private String userRole;
+
+    /**
      * 性别
      */
     private Integer gender;

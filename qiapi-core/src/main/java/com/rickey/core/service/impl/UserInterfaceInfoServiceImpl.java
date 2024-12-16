@@ -3,6 +3,8 @@ package com.rickey.core.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rickey.common.model.entity.InterfaceInfo;
+import com.rickey.core.mapper.InterfaceInfoMapper;
 import com.rickey.core.mapper.UserInterfaceInfoMapper;
 import com.rickey.core.service.UserInterfaceInfoService;
 import com.rickey.common.common.ErrorCode;
@@ -12,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * 用户接口信息服务实现类
@@ -23,9 +27,12 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 
     private final UserInterfaceInfoMapper userInterfaceInfoMapper;
 
+    private final InterfaceInfoMapper interfaceInfoMapper;
+
     @Autowired
-    public UserInterfaceInfoServiceImpl(UserInterfaceInfoMapper userInterfaceInfoMapper) {
+    public UserInterfaceInfoServiceImpl(UserInterfaceInfoMapper userInterfaceInfoMapper, InterfaceInfoMapper interfaceInfoMapper) {
         this.userInterfaceInfoMapper = userInterfaceInfoMapper;
+        this.interfaceInfoMapper = interfaceInfoMapper;
     }
 
     @Override
@@ -140,6 +147,73 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         }
         return userInterfaceInfo;
     }
+
+
+    @Override
+    public boolean applyForApiCallIncrease(Long userId, Long interfaceInfoId, Integer invokeCount) {
+        // 1. 获取接口信息
+        InterfaceInfo interfaceInfo = interfaceInfoMapper.selectById(interfaceInfoId);
+        if (Objects.isNull(interfaceInfo)) {
+            // 如果接口信息不存在，返回false
+            log.warn("InterfaceInfo not found, interfaceInfoId: {}", interfaceInfoId);
+            return false;
+        }
+
+        log.info("InterfaceInfo found: {}", interfaceInfo);
+
+        // 2. 查找用户接口信息
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId)
+                .eq("interfaceInfoId", interfaceInfoId);
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoMapper.selectOne(queryWrapper);
+
+        // 3. 如果用户接口信息不存在，创建新的记录
+        if (userInterfaceInfo == null) {
+            log.info("UserInterfaceInfo not found for userId: {}, interfaceInfoId: {}, creating new record.", userId, interfaceInfoId);
+
+            userInterfaceInfo = new UserInterfaceInfo();
+            userInterfaceInfo.setUserId(userId);
+            userInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
+            userInterfaceInfo.setLeftNum(invokeCount); // 初始化剩余次数
+            int insertCount = userInterfaceInfoMapper.insert(userInterfaceInfo);
+
+            if (insertCount > 0) {
+                log.info("Successfully created UserInterfaceInfo for userId: {}, interfaceInfoId: {}", userId, interfaceInfoId);
+                return true;
+            } else {
+                log.error("Failed to create UserInterfaceInfo for userId: {}, interfaceInfoId: {}", userId, interfaceInfoId);
+                return false;
+            }
+        }
+
+        // 4. 增加调用次数
+        Integer oldLeftNum = userInterfaceInfo.getLeftNum();
+        Integer newLeftNum = oldLeftNum + invokeCount;
+        log.debug("Old leftNum: {}, New leftNum: {}", oldLeftNum, newLeftNum);
+
+        if (oldLeftNum >= 100 || newLeftNum < 0) {
+            // 如果原本已经有100次调用次数了或者增加后的调用次数小于0，可能是非法操作，返回false
+            log.warn("Invalid operation, oldLeftNum: {}, newLeftNum: {}", oldLeftNum, newLeftNum);
+            return false;
+        }
+
+        // 5. 更新用户接口信息
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("leftNum", newLeftNum)  // 更新剩余次数
+                .eq("userId", userId)
+                .eq("interfaceInfoId", interfaceInfoId);
+        int updateCount = userInterfaceInfoMapper.update(null, updateWrapper);
+
+        if (updateCount > 0) {
+            log.info("Successfully updated leftNum for userId: {}, interfaceInfoId: {}", userId, interfaceInfoId);
+        } else {
+            log.error("Failed to update leftNum for userId: {}, interfaceInfoId: {}", userId, interfaceInfoId);
+        }
+
+        return updateCount > 0;  // 如果更新成功，返回true，否则返回false
+    }
+
+
 
 }
 

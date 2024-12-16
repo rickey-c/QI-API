@@ -27,4 +27,6 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
 
     UserInterfaceInfo getUserInterfaceInfo(long userId, long interfaceInfoId);
 
+    boolean applyForApiCallIncrease(Long userId, Long interfaceInfoId, Integer invokeCount);
+
 }

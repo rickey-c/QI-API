@@ -43,8 +43,6 @@ public class UserInterfaceInfoController {
         this.userInterfaceInfoService = userInterfaceInfoService;
     }
 
-    // region 增删改查
-
     /**
      * 创建
      *
@@ -70,6 +68,33 @@ public class UserInterfaceInfoController {
         }
         long newUserInterfaceInfoId = userInterfaceInfo.getId();
         return ResultUtils.success(newUserInterfaceInfoId);
+    }
+
+
+    /**
+     * 用户申请接口调用次数
+     *
+     * @param userInterfaceInfoAddRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/add/calls")
+    public BaseResponse<String> applyForApiCallIncrease(
+            @RequestBody UserInterfaceInfoAddRequest userInterfaceInfoAddRequest, HttpServletRequest request) {
+        if (userInterfaceInfoAddRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long userId = Long.valueOf(request.getHeader("userId"));
+        Long interfaceInfoId = userInterfaceInfoAddRequest.getInterfaceInfoId();
+        Integer invokeCount = userInterfaceInfoAddRequest.getInvokeCount();
+        log.info("userId = {}", userId);
+        log.info("interfaceInfoId = {}", interfaceInfoId);
+        log.info("invokeCount = {}", invokeCount);
+        boolean result = userInterfaceInfoService.applyForApiCallIncrease(userId, interfaceInfoId, invokeCount);
+        if (!result) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        return ResultUtils.success("申请增加接口调用次数成功");
     }
 
     /**
@@ -196,6 +221,5 @@ public class UserInterfaceInfoController {
         return ResultUtils.success(userInterfaceInfoPage);
     }
 
-    // endregion
 
 }
