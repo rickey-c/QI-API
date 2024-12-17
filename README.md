@@ -131,11 +131,11 @@ public class QiAPIClientSDKTest {
 3. 调用接口，观察响应日志
 
 ```java
-// 成功响应
+// 响应成功
 19:25:23.060 [main] INFO com.rickey.sdktest.QiAPIClientSDKTest -接口调用成功!
 randomEncouragement =心灵鸡汤为:每一个不曾起舞的日子，都是对生命的辜负！
 
-// 失败响应
+        // 响应失败
 19:37:48.819 [main] ERROR com.rickey.sdktest.QiAPIClientSDKTest - 接口调用失败，请检查密钥是否正确!
 
 ```
