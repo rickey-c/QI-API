@@ -4,11 +4,7 @@
 
 「Qi-API」是一款高效、可靠和安全的接口开放平台，为广大用户提供高质量、可靠、安全的接口服务，帮助用户轻松实现各种功能和数据交互，提高工作效率和用户体验。
 
-本项目为**前后端分离项目**，前端主要采用TypeScript、React、Ant Design Pro等主流开发框架。后端采用Spring Cloud SpringBoot
-作为业务框架。通过Spring Cloud Gateway作为全局网关进行路由管理、流量染色和负载均衡，并通过全链路日志以及WebFlux回调配置, 支持
-**异步接口调用** 。使用Mybatis-plus作为持久层技术。使用Apache Dubbo做高性能**远程服务调用**
-。使用Nacos作为注册中心，完成服务注册与发现，通过各模块主要功能以及业务进行模块的合理划分。使用 Sentinel 进行**接口流量管理
-**，通过限流策略有效保障服务的稳定性与安全性。同时使用 RocketMQ 对涉及第三方回调接口的业务进行 **异步通知**，实现服务链路解耦。
+本项目为**前后端分离项目**，前端采用TypeScript、React、Ant Design Pro等主流开发框架。后端采用Spring Cloud SpringBoot作为业务框架。通过Spring Cloud Gateway作为全局网关进行路由管理、流量染色和负载均衡，并通过WebFlux回调配置, 支持**异步接口调用**，同时实现了全链路日志。使用Mybatis-plus作为持久层技术。使用Apache Dubbo做高性能**远程服务调用**。使用Nacos作为注册中心，完成服务注册与发现，通过各模块主要功能以及业务进行模块的合理划分。使用 Sentinel 进行**接口流量管理**，通过限流策略有效保障服务的稳定性与安全性。同时使用 RocketMQ 对涉及第三方回调接口的业务进行 **异步通知**，实现服务链路解耦。
 
 项目客户端依赖「**qiapi-clientSDK-spring-boot-starter**」已上传至Maven Central
 Repository，用户可以选择在接口平台在线调用或者在项目中引入依赖并传入accessKey、secretKey进行API调用。
@@ -24,7 +20,7 @@ Repository，用户可以选择在接口平台在线调用或者在项目中引�
 
 ## 系统架构
 
-![image](https://github.com/rickey-c/qiapi-backend/blob/master/qiapi-doc/Architecture%20Diagram/Qi-API-Architecture%20Diagram.png)
+![image](https://github.com/rickey-c/Qi-API/blob/master/qiapi-doc/Architecture%20Diagram/Qi-API-Architecture%20Diagram.png?raw=true)
 
 ## 技术栈
 
@@ -107,28 +103,40 @@ Repository，用户可以选择在接口平台在线调用或者在项目中引�
   </dependencies>
 ```
 
-2. 创建客户端，使用accessKey、secretKey进行调用
+2. 创建客户端，传入accessKey、secretKey进行调用
 
 ```java
 public class QiAPIClientSDKTest {
 
   private static final Logger log = LoggerFactory.getLogger(QiAPIClientSDKTest.class);
 
+  private static String ERROR_MESSAGE = "Error request, response status: 403";
+
   public static void main(String[] args) {
     String accessKey = "yourAccessKey";
     String secretKey = "yourSecretKey";
     RandomApiClient randomApiClient = new RandomApiClient(accessKey, secretKey);
     String randomEncouragement = randomApiClient.getRandomEncouragement();
-    log.info("接口调用成功! \nrandomEncouragement = {}", randomEncouragement);
+    if (!ERROR_MESSAGE.equals(randomEncouragement)){
+        log.info("接口调用成功! \n" +
+                "randomEncouragement = {}", randomEncouragement);
+    }else {
+        log.error("接口调用失败，请检查密钥是否正确!");
+    }
   }
 }
+
 ```
 
 3. 调用接口，观察响应日志
 
 ```java
-19:25:23.060[main]
-INFO com.rickey.sdktest.QiAPIClientSDKTest -接口调用成功!
+// 成功响应
+19:25:23.060 [main] INFO com.rickey.sdktest.QiAPIClientSDKTest -接口调用成功!
 randomEncouragement =心灵鸡汤为:每一个不曾起舞的日子，都是对生命的辜负！
+
+// 失败响应
+19:37:48.819 [main] ERROR com.rickey.sdktest.QiAPIClientSDKTest - 接口调用失败，请检查密钥是否正确!
+
 ```
 
