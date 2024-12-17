@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.8 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.8">
   <diagram id="prtHgNgQTEPvFCAcTncT" name="Page-1">
-    <mxGraphModel dx="1029" dy="615" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="978" dy="584" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -169,10 +169,10 @@
           <mxGeometry x="141" y="515" width="115" height="50" as="geometry" />
         </mxCell>
         <mxCell id="pnSuQXYb4ILXROEF6l5I-45" value="&lt;b&gt;Redis&lt;/b&gt;&lt;div&gt;&lt;b&gt;分布式Session管理&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#99FF99;" parent="dNxyNK7c78bLwvsdeMH5-11" vertex="1">
-          <mxGeometry x="406" y="515" width="115" height="50" as="geometry" />
+          <mxGeometry x="395.5" y="515" width="115" height="50" as="geometry" />
         </mxCell>
         <mxCell id="pnSuQXYb4ILXROEF6l5I-46" value="&lt;b&gt;Mybatis-plus&lt;/b&gt;&lt;div&gt;&lt;b&gt;ORM框架&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#99FF99;" parent="dNxyNK7c78bLwvsdeMH5-11" vertex="1">
-          <mxGeometry x="274.75" y="515" width="115" height="50" as="geometry" />
+          <mxGeometry x="269" y="515" width="115" height="50" as="geometry" />
         </mxCell>
         <mxCell id="pnSuQXYb4ILXROEF6l5I-48" value="&lt;b&gt;日&lt;/b&gt;&lt;div&gt;&lt;b&gt;志&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;处&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;理&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCF578;" parent="dNxyNK7c78bLwvsdeMH5-11" vertex="1">
           <mxGeometry x="663" y="275" width="30" height="300" as="geometry" />
@@ -268,8 +268,8 @@
         <mxCell id="pnSuQXYb4ILXROEF6l5I-153" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.489;entryY=0.041;entryDx=0;entryDy=0;entryPerimeter=0;" parent="dNxyNK7c78bLwvsdeMH5-11" source="uwBZGx5Mv4PH8Rtc_T75-27" target="pnSuQXYb4ILXROEF6l5I-55" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="120VNMi8KpEO2bEq0EOa-1" value="&lt;b&gt;Spring Scheduled&lt;/b&gt;&lt;div&gt;&lt;b&gt;定时任务&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#99FF99;" vertex="1" parent="dNxyNK7c78bLwvsdeMH5-11">
-          <mxGeometry x="529.51" y="515" width="115" height="50" as="geometry" />
+        <mxCell id="120VNMi8KpEO2bEq0EOa-1" value="&lt;b&gt;Spring Scheduled&lt;/b&gt;&lt;div&gt;&lt;b&gt;定时任务&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#99FF99;" parent="dNxyNK7c78bLwvsdeMH5-11" vertex="1">
+          <mxGeometry x="524.5" y="515" width="115" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
